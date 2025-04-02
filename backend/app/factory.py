@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from firebase_admin import credentials
 
 from app.v1.movies.routes import movies_routes
+from app.v1.user.routes import user_routes
 
 
 
@@ -60,5 +61,6 @@ def create_app():
     app.add_exception_handler(Exception, error_handler)
     app.include_router(health)
     app.include_router(movies_routes)
+    app.include_router(user_routes)
     
     return app
