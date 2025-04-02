@@ -12,7 +12,7 @@ export default function Sidebar() {
 
   const handleConversationClick = (conversationId: string) => {
     // Navigate to the chat page with the selected conversation
-    router.push(`/chat?conversation=${conversationId}`)
+    router.push(`/chat?conversation=${conversationId}`
   }
 
   return (
