@@ -11,6 +11,8 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from firebase_admin import credentials
 
+from app.v1.movies.routes import movies_routes
+
 
 
 health = APIRouter(tags=["health"], responses={404: {"description": "Not found"}})
@@ -57,5 +59,6 @@ def create_app():
     )
     app.add_exception_handler(Exception, error_handler)
     app.include_router(health)
+    app.include_router(movies_routes)
     
     return app

@@ -1,5 +1,8 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class FastAPISettings(BaseSettings):
     host: str = "127.0.0.1"
