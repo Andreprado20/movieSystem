@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Eye, Heart, Clock, Star, Settings, HelpCircle } from "lucide-react"
@@ -8,108 +8,82 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import MovieCard from "@/components/movie-card"
 
+interface Movie {
+  id: string
+  title: string
+  year: number
+  rating: number
+  posterUrl: string
+  genres: string[]
+}
+
+interface UserProfile {
+  username: string
+  displayName: string
+  bio: string
+  stats: {
+    watched: number
+    reviews: number
+    lists: number
+    followers: number
+    following: number
+  }
+}
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("assistidos")
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [watchedMovies, setWatchedMovies] = useState<Movie[]>([])
+  const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([])
+  const [watchLaterMovies, setWatchLaterMovies] = useState<Movie[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Sample movie data
-  const watchedMovies = [
-    {
-      id: "interstellar",
-      title: "Interstellar",
-      year: 2014,
-      rating: 4.8,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Interstellar",
-      genres: ["Ficção Científica", "Drama", "Aventura"],
-    },
-    {
-      id: "movie-2",
-      title: "The Dark Knight",
-      year: 2008,
-      rating: 4.9,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Dark+Knight",
-      genres: ["Ação", "Drama", "Crime"],
-    },
-    {
-      id: "movie-3",
-      title: "Inception",
-      year: 2010,
-      rating: 4.7,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Inception",
-      genres: ["Ficção Científica", "Ação", "Aventura"],
-    },
-    {
-      id: "movie-4",
-      title: "Pulp Fiction",
-      year: 1994,
-      rating: 4.8,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Pulp+Fiction",
-      genres: ["Crime", "Drama"],
-    },
-    {
-      id: "movie-5",
-      title: "The Godfather",
-      year: 1972,
-      rating: 4.9,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Godfather",
-      genres: ["Crime", "Drama"],
-    },
-    {
-      id: "movie-6",
-      title: "Fight Club",
-      year: 1999,
-      rating: 4.8,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Fight+Club",
-      genres: ["Drama", "Thriller"],
-    },
-    {
-      id: "movie-7",
-      title: "The Matrix",
-      year: 1999,
-      rating: 4.7,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Matrix",
-      genres: ["Ficção Científica", "Ação"],
-    },
-    {
-      id: "movie-8",
-      title: "Goodfellas",
-      year: 1990,
-      rating: 4.7,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Goodfellas",
-      genres: ["Crime", "Drama", "Biografia"],
-    },
-    {
-      id: "movie-9",
-      title: "The Shawshank Redemption",
-      year: 1994,
-      rating: 4.9,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Shawshank",
-      genres: ["Drama", "Crime"],
-    },
-    {
-      id: "movie-10",
-      title: "Parasite",
-      year: 2019,
-      rating: 4.6,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Parasite",
-      genres: ["Thriller", "Drama", "Comédia"],
-    },
-    {
-      id: "movie-11",
-      title: "Joker",
-      year: 2019,
-      rating: 4.5,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Joker",
-      genres: ["Crime", "Drama", "Thriller"],
-    },
-    {
-      id: "movie-12",
-      title: "Avengers: Endgame",
-      year: 2019,
-      rating: 4.7,
-      posterUrl: "/placeholder.svg?height=300&width=200&text=Avengers",
-      genres: ["Ação", "Aventura", "Ficção Científica"],
-    },
-  ]
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        // Fetch user profile
+        const profileResponse = await fetch('http://localhost:3000/api/profile');
+        const profileData = await profileResponse.json();
+        setProfile(profileData);
+
+        // Fetch watched movies
+        const watchedResponse = await fetch('http://localhost:3000/api/profile/watched');
+        const watchedData = await watchedResponse.json();
+        setWatchedMovies(watchedData);
+
+        // Fetch favorite movies
+        const favoritesResponse = await fetch('http://localhost:3000/api/profile/favorites');
+        const favoritesData = await favoritesResponse.json();
+        setFavoriteMovies(favoritesData);
+
+        // Fetch watch later movies
+        const watchLaterResponse = await fetch('http://localhost:3000/api/profile/watchlater');
+        const watchLaterData = await watchLaterResponse.json();
+        setWatchLaterMovies(watchLaterData);
+
+        // Fetch reviews
+        const reviewsResponse = await fetch('http://localhost:3000/api/profile/reviews');
+        const reviewsData = await reviewsResponse.json();
+        setReviews(reviewsData);
+
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#121212] text-white flex items-center justify-center">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#121212] text-white pb-16">
@@ -125,8 +99,8 @@ export default function ProfilePage() {
           <div className="flex-1 flex flex-col items-center md:items-start">
             <div className="w-full flex flex-col md:flex-row md:justify-between">
               <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
-                <h1 className="text-2xl font-bold">Nome</h1>
-                <span className="text-gray-400">@Nome</span>
+                <h1 className="text-2xl font-bold">{profile?.displayName}</h1>
+                <span className="text-gray-400">@{profile?.username}</span>
                 <Button className="rounded-full px-6 bg-white text-black hover:bg-gray-200">Seguir</Button>
               </div>
 
@@ -136,29 +110,29 @@ export default function ProfilePage() {
             </div>
 
             <p className="text-gray-300 mb-6 text-center md:text-left">
-              Cinéfilo apaixonado | Crítico Amador | Colecionador de Filmes Clássicos
+              {profile?.bio}
             </p>
 
             {/* Stats */}
             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-center">
               <div className="flex flex-col">
-                <span className="text-xl font-bold">271</span>
+                <span className="text-xl font-bold">{profile?.stats.watched}</span>
                 <span className="text-sm text-gray-400">Assistidos</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">213</span>
+                <span className="text-xl font-bold">{profile?.stats.reviews}</span>
                 <span className="text-sm text-gray-400">Críticas</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">13</span>
+                <span className="text-xl font-bold">{profile?.stats.lists}</span>
                 <span className="text-sm text-gray-400">Listas</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">10</span>
+                <span className="text-xl font-bold">{profile?.stats.followers}</span>
                 <span className="text-sm text-gray-400">Seguidores</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">30</span>
+                <span className="text-xl font-bold">{profile?.stats.following}</span>
                 <span className="text-sm text-gray-400">Seguindo</span>
               </div>
             </div>
@@ -208,7 +182,7 @@ export default function ProfilePage() {
           <TabsContent value="favoritos">
             <h2 className="text-2xl font-bold mb-6">Favoritos</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {watchedMovies.slice(0, 8).map((movie) => (
+              {favoriteMovies.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   id={movie.id}
@@ -225,7 +199,7 @@ export default function ProfilePage() {
           <TabsContent value="assistir-depois">
             <h2 className="text-2xl font-bold mb-6">Assistir depois</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {watchedMovies.slice(4, 10).map((movie) => (
+              {watchLaterMovies.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   id={movie.id}
@@ -242,19 +216,19 @@ export default function ProfilePage() {
           <TabsContent value="criticas">
             <h2 className="text-2xl font-bold mb-6">Críticas</h2>
             <div className="space-y-6">
-              {watchedMovies.slice(0, 5).map((movie) => (
-                <div key={movie.id} className="bg-gray-800 rounded-lg p-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex gap-4">
                     <div className="relative w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
                       <Image
-                        src={movie.posterUrl || "/placeholder.svg"}
-                        alt={movie.title}
+                        src={review.movie.posterUrl || "/placeholder.svg"}
+                        alt={review.movie.title}
                         fill
                         className="object-cover"
                       />
                     </div>
                     <div>
-                      <h3 className="font-bold mb-1">{movie.title}</h3>
+                      <h3 className="font-bold mb-1">{review.movie.title}</h3>
                       <div className="flex items-center gap-1 mb-2">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
@@ -265,8 +239,7 @@ export default function ProfilePage() {
                         ))}
                       </div>
                       <p className="text-sm text-gray-300">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-                        labore et dolore magna aliqua.
+                        {review.comment}
                       </p>
                     </div>
                   </div>
