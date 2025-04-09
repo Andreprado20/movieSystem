@@ -1,7 +1,9 @@
 import firebase_admin
 from contextlib import asynccontextmanager
 from pathlib import Path
-import asyncpg
+import os
+from supabase import create_client, Client
+import logging
 
 from fastapi import APIRouter, FastAPI
 from fastapi.routing import APIRoute
@@ -10,15 +12,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from firebase_admin import credentials
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
 
 from app.v1.movies.routes import movies_routes
 from app.v1.user.routes import user_routes
 
-
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 health = APIRouter(tags=["health"], responses={404: {"description": "Not found"}})
 
-DATABASE_URL = "postgresql://postgres:Fde2ZOInnYEScXdn@db.qoplwtzicemqpxytfzoj.supabase.co:5432/postgres"
+# Supabase configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# Log Supabase configuration (mask the key for security)
+if SUPABASE_URL and SUPABASE_KEY:
+    logger.info(f"Supabase URL: {SUPABASE_URL}")
+    logger.info(f"Supabase Key: {SUPABASE_KEY[:10]}...")
+else:
+    logger.error("Missing Supabase configuration")
 
 
 @health.get("/health")
@@ -42,15 +56,27 @@ async def lifespan(app: FastAPI):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
 
-    app.state.pool = await asyncpg.create_pool(DATABASE_URL)
+    # Initialize Supabase client
+    logger.info("Initializing Supabase client")
+    app.state.supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    logger.info("Supabase client initialized successfully")
     
     yield
 
-    await app.state.pool.close()
-    
+    # No need to close Supabase client
+
 
 def create_app():
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(
+        title="Movie System API",
+        description="API para sistema de gerenciamento de filmes",
+        version="1.0.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+        lifespan=lifespan
+    )
+    
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
