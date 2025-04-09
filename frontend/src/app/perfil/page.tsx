@@ -2,29 +2,117 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Eye, Heart, Clock, Star, Settings } from "lucide-react"
+import Link from "next/link"
+import { Eye, Heart, Clock, Star, Settings, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import MovieCard from "@/components/movie-card"
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("assistidos")
 
   // Sample movie data
-  const watchedMovies = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    title: `Movie ${i + 1}`,
-    image: `/placeholder.svg?height=300&width=200&text=Movie+${i + 1}`,
-  }))
+  const watchedMovies = [
+    {
+      id: "interstellar",
+      title: "Interstellar",
+      year: 2014,
+      rating: 4.8,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Interstellar",
+      genres: ["Ficção Científica", "Drama", "Aventura"],
+    },
+    {
+      id: "movie-2",
+      title: "The Dark Knight",
+      year: 2008,
+      rating: 4.9,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Dark+Knight",
+      genres: ["Ação", "Drama", "Crime"],
+    },
+    {
+      id: "movie-3",
+      title: "Inception",
+      year: 2010,
+      rating: 4.7,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Inception",
+      genres: ["Ficção Científica", "Ação", "Aventura"],
+    },
+    {
+      id: "movie-4",
+      title: "Pulp Fiction",
+      year: 1994,
+      rating: 4.8,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Pulp+Fiction",
+      genres: ["Crime", "Drama"],
+    },
+    {
+      id: "movie-5",
+      title: "The Godfather",
+      year: 1972,
+      rating: 4.9,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Godfather",
+      genres: ["Crime", "Drama"],
+    },
+    {
+      id: "movie-6",
+      title: "Fight Club",
+      year: 1999,
+      rating: 4.8,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Fight+Club",
+      genres: ["Drama", "Thriller"],
+    },
+    {
+      id: "movie-7",
+      title: "The Matrix",
+      year: 1999,
+      rating: 4.7,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Matrix",
+      genres: ["Ficção Científica", "Ação"],
+    },
+    {
+      id: "movie-8",
+      title: "Goodfellas",
+      year: 1990,
+      rating: 4.7,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Goodfellas",
+      genres: ["Crime", "Drama", "Biografia"],
+    },
+    {
+      id: "movie-9",
+      title: "The Shawshank Redemption",
+      year: 1994,
+      rating: 4.9,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Shawshank",
+      genres: ["Drama", "Crime"],
+    },
+    {
+      id: "movie-10",
+      title: "Parasite",
+      year: 2019,
+      rating: 4.6,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Parasite",
+      genres: ["Thriller", "Drama", "Comédia"],
+    },
+    {
+      id: "movie-11",
+      title: "Joker",
+      year: 2019,
+      rating: 4.5,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Joker",
+      genres: ["Crime", "Drama", "Thriller"],
+    },
+    {
+      id: "movie-12",
+      title: "Avengers: Endgame",
+      year: 2019,
+      rating: 4.7,
+      posterUrl: "/placeholder.svg?height=300&width=200&text=Avengers",
+      genres: ["Ação", "Aventura", "Ficção Científica"],
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-[#121212] text-white pb-16">
-      {/* Settings Button */}
-      <div className="absolute top-4 right-4">
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-          <Settings className="h-6 w-6" />
-        </Button>
-      </div>
-
       {/* Profile Header */}
       <div className="pt-8 px-8 md:px-16">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
@@ -34,11 +122,17 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile Info */}
-          <div className="flex flex-col items-center md:items-start">
-            <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
-              <h1 className="text-2xl font-bold">Nome</h1>
-              <span className="text-gray-400">@Nome</span>
-              <Button className="rounded-full px-6 bg-white text-black hover:bg-gray-200">Seguir</Button>
+          <div className="flex-1 flex flex-col items-center md:items-start">
+            <div className="w-full flex flex-col md:flex-row md:justify-between">
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+                <h1 className="text-2xl font-bold">Nome</h1>
+                <span className="text-gray-400">@Nome</span>
+                <Button className="rounded-full px-6 bg-white text-black hover:bg-gray-200">Seguir</Button>
+              </div>
+
+              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white self-center md:self-start">
+                <Settings className="h-6 w-6" />
+              </Button>
             </div>
 
             <p className="text-gray-300 mb-6 text-center md:text-left">
@@ -96,54 +190,51 @@ export default function ProfilePage() {
 
           <TabsContent value="assistidos">
             <h2 className="text-2xl font-bold mb-6">Assistidos</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {watchedMovies.map((movie) => (
-                <div key={movie.id} className="cursor-pointer group">
-                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                    <Image
-                      src={movie.image || "/placeholder.svg"}
-                      alt={movie.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                </div>
+                <MovieCard
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  year={movie.year}
+                  rating={movie.rating}
+                  posterUrl={movie.posterUrl}
+                  genres={movie.genres}
+                />
               ))}
             </div>
           </TabsContent>
 
           <TabsContent value="favoritos">
             <h2 className="text-2xl font-bold mb-6">Favoritos</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {watchedMovies.slice(0, 8).map((movie) => (
-                <div key={movie.id} className="cursor-pointer group">
-                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                    <Image
-                      src={movie.image || "/placeholder.svg"}
-                      alt={movie.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                </div>
+                <MovieCard
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  year={movie.year}
+                  rating={movie.rating}
+                  posterUrl={movie.posterUrl}
+                  genres={movie.genres}
+                />
               ))}
             </div>
           </TabsContent>
 
           <TabsContent value="assistir-depois">
             <h2 className="text-2xl font-bold mb-6">Assistir depois</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {watchedMovies.slice(4, 10).map((movie) => (
-                <div key={movie.id} className="cursor-pointer group">
-                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                    <Image
-                      src={movie.image || "/placeholder.svg"}
-                      alt={movie.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                </div>
+                <MovieCard
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title}
+                  year={movie.year}
+                  rating={movie.rating}
+                  posterUrl={movie.posterUrl}
+                  genres={movie.genres}
+                />
               ))}
             </div>
           </TabsContent>
@@ -155,7 +246,12 @@ export default function ProfilePage() {
                 <div key={movie.id} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex gap-4">
                     <div className="relative w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
-                      <Image src={movie.image || "/placeholder.svg"} alt={movie.title} fill className="object-cover" />
+                      <Image
+                        src={movie.posterUrl || "/placeholder.svg"}
+                        alt={movie.title}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div>
                       <h3 className="font-bold mb-1">{movie.title}</h3>
@@ -180,7 +276,14 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* FAQ Link at the bottom */}
+      <div className="mt-16 text-center">
+        <Link href="/faq" className="inline-flex items-center gap-2 text-gray-400 hover:text-white">
+          <HelpCircle className="h-5 w-5" />
+          <span>Perguntas Frequentes</span>
+        </Link>
+      </div>
     </div>
   )
 }
-
