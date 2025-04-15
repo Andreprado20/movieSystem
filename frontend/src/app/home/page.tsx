@@ -1,364 +1,171 @@
 "use client"
 
 import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bell, Smile, Send } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Search } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import Header from "@/components/header"
 
-export default function CineMatchInterface() {
-  const [activeTab, setActiveTab] = useState("conversas")
+export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Movie data for each section
+  const recommendedMovies = [
+    { id: 1, title: "Inception", image: "/placeholder.svg?height=300&width=200&text=Inception" },
+    { id: 2, title: "The Dark Knight", image: "/placeholder.svg?height=300&width=200&text=The+Dark+Knight" },
+    { id: 3, title: "Interstellar", image: "/placeholder.svg?height=300&width=200&text=Interstellar" },
+    { id: 4, title: "Parasite", image: "/placeholder.svg?height=300&width=200&text=Parasite" },
+    { id: 5, title: "Joker", image: "/placeholder.svg?height=300&width=200&text=Joker" },
+  ]
+
+  const communityMovies = [
+    { id: 6, title: "The Godfather", image: "/placeholder.svg?height=300&width=200&text=The+Godfather" },
+    { id: 7, title: "Pulp Fiction", image: "/placeholder.svg?height=300&width=200&text=Pulp+Fiction" },
+    { id: 8, title: "Fight Club", image: "/placeholder.svg?height=300&width=200&text=Fight+Club" },
+    { id: 9, title: "The Matrix", image: "/placeholder.svg?height=300&width=200&text=The+Matrix" },
+    { id: 10, title: "Goodfellas", image: "/placeholder.svg?height=300&width=200&text=Goodfellas" },
+  ]
+
+  const topRatedMovies = [
+    { id: 11, title: "The Shawshank Redemption", image: "/placeholder.svg?height=300&width=200&text=Shawshank" },
+    { id: 12, title: "The Godfather", image: "/placeholder.svg?height=300&width=200&text=Godfather" },
+    { id: 13, title: "The Dark Knight", image: "/placeholder.svg?height=300&width=200&text=Dark+Knight" },
+    { id: 14, title: "12 Angry Men", image: "/placeholder.svg?height=300&width=200&text=12+Angry+Men" },
+    { id: 15, title: "Schindler's List", image: "/placeholder.svg?height=300&width=200&text=Schindler" },
+  ]
+
+  const becauseYouWatchedMovies = [
+    { id: 16, title: "Ready Player One", image: "/placeholder.svg?height=300&width=200&text=Ready+Player+One" },
+    { id: 17, title: "Free Guy", image: "/placeholder.svg?height=300&width=200&text=Free+Guy" },
+    { id: 18, title: "Sword Art Online", image: "/placeholder.svg?height=300&width=200&text=SAO" },
+    { id: 19, title: "Tron: Legacy", image: "/placeholder.svg?height=300&width=200&text=Tron" },
+    { id: 20, title: "The Matrix", image: "/placeholder.svg?height=300&width=200&text=Matrix" },
+  ]
 
   return (
-    <div className="flex flex-col h-screen bg-[#121212] text-white">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-gray-800">
-        <div className="flex items-center gap-2">
-          <div className="relative w-8 h-8">
-            <Image
-              src="/placeholder.svg?height=32&width=32"
-              alt="CineMatch Logo"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          </div>
-          <h1 className="text-xl font-bold">CineMatch</h1>
+    <div className="min-h-screen bg-[#121212] text-white">
+      <Header />
+
+      {/* Hero Section with Search */}
+      <section className="py-20 px-4 flex flex-col items-center justify-center text-center">
+        <h1 className="text-3xl font-bold mb-8">O que vamos assistir hoje?</h1>
+        <div className="relative w-full max-w-xl">
+          <Input
+            type="text"
+            placeholder="Digite o filme aqui"
+            className="bg-gray-800/80 border-gray-700 rounded-full py-6 pl-6 pr-12 text-lg"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Button
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent hover:bg-transparent text-gray-400"
+            size="icon"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
         </div>
+      </section>
 
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link href="#" className="hover:text-gray-300">
-            Início
-          </Link>
-          <Link href="#" className="hover:text-gray-300">
-            Calendário
-          </Link>
-          <Link href="#" className="hover:text-gray-300">
-            Comunidades
-          </Link>
-          <Link href="#" className="hover:text-gray-300">
-            Perfil
-          </Link>
-        </nav>
-
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-5 w-5" />
-        </Button>
-      </header>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-80 border-r border-gray-800 flex flex-col">
-          {/* Tabs */}
-          <div className="p-2">
-            <Tabs defaultValue="conversas" className="w-full">
-              <TabsList className="grid grid-cols-2 h-10 bg-gray-800/50 rounded-md w-full">
-                <TabsTrigger
-                  value="conversas"
-                  className="rounded-md data-[state=active]:bg-blue-600"
-                  onClick={() => setActiveTab("conversas")}
-                >
-                  Conversas
-                </TabsTrigger>
-                <TabsTrigger
-                  value="amigos"
-                  className="rounded-md data-[state=active]:bg-blue-600"
-                  onClick={() => setActiveTab("amigos")}
-                >
-                  Amigos
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+      {/* Movie Sections */}
+      <div className="px-12 pb-16 space-y-12">
+        {/* Recommended Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Recomendados para você</h2>
+            <Link href="/recomendados" className="text-sm text-gray-400 hover:text-white">
+              Ver todos
+            </Link>
           </div>
-
-          {/* Search */}
-          <div className="p-2">
-            <Input
-              placeholder={activeTab === "conversas" ? "Buscar conversas..." : "Buscar amigos..."}
-              className="bg-gray-800 border-gray-700 text-sm"
-            />
-          </div>
-
-          {/* Content based on active tab */}
-          <div className="flex-1 overflow-y-auto">
-            {activeTab === "conversas" ? (
-              <>
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="João Pereira" />
-                      <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">João Pereira</h3>
-                        <span className="text-xs text-gray-400">21:00</span>
-                      </div>
-                      <p className="text-sm text-gray-400 truncate">Aquele final foi incrível...</p>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {recommendedMovies.map((movie) => (
+              <div key={movie.id} className="cursor-pointer group">
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                  <Image
+                    src={movie.image || "/placeholder.svg"}
+                    alt={movie.title}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
                 </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Grupo" />
-                      <AvatarFallback className="bg-gray-600 text-white">GC</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Grupo de Cinéfilos</h3>
-                        <span className="text-xs text-gray-400">20:35</span>
-                      </div>
-                      <p className="text-sm text-gray-400 truncate">Claro! Pode deixar</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Maria Silva" />
-                      <AvatarFallback className="bg-gray-600 text-white">MS</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Maria Silva</h3>
-                        <span className="text-xs text-gray-400">21:00</span>
-                      </div>
-                      <p className="text-sm text-gray-400 truncate">Vamos assistir juntos no...</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Clube do Filme" />
-                      <AvatarFallback className="bg-gray-600 text-white">CF</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Clube do Filme Clássico</h3>
-                        <span className="text-xs text-gray-400">19:00</span>
-                      </div>
-                      <p className="text-sm text-gray-400 truncate">Próxima Sessão: Cida...</p>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ana Souza" />
-                      <AvatarFallback className="bg-gray-600 text-white">AS</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Ana Souza</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Bruno Almeida" />
-                      <AvatarFallback className="bg-gray-600 text-white">BA</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Bruno Almeida</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Camila Ferreira" />
-                      <AvatarFallback className="bg-gray-600 text-white">CF</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Camila Ferreira</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Diego Costa" />
-                      <AvatarFallback className="bg-gray-600 text-white">DC</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Diego Costa</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Elisa Martins" />
-                      <AvatarFallback className="bg-gray-600 text-white">EM</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Elisa Martins</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Felipe Oliveira" />
-                      <AvatarFallback className="bg-gray-600 text-white">FO</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Felipe Oliveira</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
-                  <div className="flex items-center gap-3 p-2">
-                    <Avatar className="h-10 w-10 border border-gray-700">
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Gabriela Lima" />
-                      <AvatarFallback className="bg-gray-600 text-white">GL</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col">
-                        <h3 className="font-medium">Gabriela Lima</h3>
-                        <p className="text-sm text-gray-400">Cinéfilo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </aside>
-
-        {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col">
-          {/* Chat Header */}
-          <div className="p-4 border-b border-gray-800 flex items-center gap-3">
-            <Avatar className="h-12 w-12 border border-gray-700">
-              <AvatarImage src="/placeholder.svg?height=48&width=48" alt="João Pereira" />
-              <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="font-medium text-lg">João Pereira</h2>
-              <p className="text-sm text-gray-400">online</p>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            <div className="flex items-start gap-3">
-              <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="João Pereira" />
-                <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
-              </Avatar>
-              <div className="space-y-1">
-                <div className="bg-gray-800 rounded-lg p-3 max-w-md">
-                  <p>Você já assistiu o novo filme do Nolan ?</p>
-                </div>
-                <p className="text-xs text-gray-500">20:28</p>
               </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="João Pereira" />
-                <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
-              </Avatar>
-              <div className="space-y-1">
-                <div className="bg-gray-800 rounded-lg p-3 max-w-md">
-                  <p>É incrível, a fotografia é perfeita!</p>
-                </div>
-                <p className="text-xs text-gray-500">20:30</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="João Pereira" />
-                <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
-              </Avatar>
-              <div className="space-y-1">
-                <div className="bg-gray-800 rounded-lg p-3 max-w-md">
-                  <p>Tem uma cena lá muito boa!</p>
-                </div>
-                <p className="text-xs text-gray-500">20:30</p>
-              </div>
-            </div>
-
-            <div className="flex flex-row-reverse items-start gap-3">
-              <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="You" />
-                <AvatarFallback className="bg-gray-600 text-white">YO</AvatarFallback>
-              </Avatar>
-              <div className="space-y-1 items-end flex flex-col">
-                <div className="bg-blue-600 rounded-lg p-3 max-w-md">
-                  <p>Sem spoilers, pelo amor de Deus!</p>
-                </div>
-                <p className="text-xs text-gray-500">20:34</p>
-              </div>
-            </div>
-
-            <div className="flex flex-row-reverse items-start gap-3">
-              <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="You" />
-                <AvatarFallback className="bg-gray-600 text-white">YO</AvatarFallback>
-              </Avatar>
-              <div className="space-y-1 items-end flex flex-col">
-                <div className="bg-blue-600 rounded-lg p-3 max-w-md">
-                  <p>Se não eu vou matar você!</p>
-                </div>
-                <p className="text-xs text-gray-500">20:34</p>
-              </div>
-            </div>
+            ))}
           </div>
+        </section>
 
-          {/* Message Input */}
-          <div className="p-3 border-t border-gray-800 flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="text-gray-400">
-              <Smile className="h-6 w-6" />
-            </Button>
-            <Input
-              placeholder="Digite sua mensagem..."
-              className="bg-gray-700 border-gray-600 focus-visible:ring-blue-600"
-            />
-            <Button size="icon" className="rounded-full bg-blue-600 hover:bg-blue-700">
-              <Send className="h-5 w-5" />
-            </Button>
+        {/* Community Suggestions Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Sugeridos pelas suas Comunidades</h2>
+            <Link href="/comunidades-sugestoes" className="text-sm text-gray-400 hover:text-white">
+              Ver todos
+            </Link>
           </div>
-        </main>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {communityMovies.map((movie) => (
+              <div key={movie.id} className="cursor-pointer group">
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                  <Image
+                    src={movie.image || "/placeholder.svg"}
+                    alt={movie.title}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Top Rated Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Mais bem avaliados</h2>
+            <Link href="/top-rated" className="text-sm text-gray-400 hover:text-white">
+              Ver todos
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {topRatedMovies.map((movie) => (
+              <div key={movie.id} className="cursor-pointer group">
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                  <Image
+                    src={movie.image || "/placeholder.svg"}
+                    alt={movie.title}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Because You Watched Section */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Porque você assistiu "Autentic Games: Namorada Perfeita"</h2>
+            <Link href="/because-you-watched" className="text-sm text-gray-400 hover:text-white">
+              Ver todos
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {becauseYouWatchedMovies.map((movie) => (
+              <div key={movie.id} className="cursor-pointer group">
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                  <Image
+                    src={movie.image || "/placeholder.svg"}
+                    alt={movie.title}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )
 }
-
