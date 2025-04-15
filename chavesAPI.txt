@@ -6,6 +6,8 @@ Quero bons filmes de ação
 
 "Me vê filmes com Jason Momoa"
 "Me fala filmes do diretor David Ayer"
+"Me fale bons filmes com avaliações maiores que 8"
+"Me fale um filme dirigido por Lowell Dean, com Steven Ogg no elenco e a avaliação maior que 4"
 
 
 def recomendar_com_gemini(pergunta_usuario, filmes):
