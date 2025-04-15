@@ -1,0 +1,43 @@
+def extrair_genero(texto):
+    match = re.search(r"filmes de ([a-zA-Zá-úãõç ]+)", texto, re.IGNORECASE)
+    return match.group(1).strip().capitalize() if match else None
+
+def extrair_diretor(texto):
+    match = re.search(r"filmes (?:dirigidos por|do diretor) ([a-zA-Zá-úãõç ]+)", texto, re.IGNORECASE)
+    return match.group(1).strip().title() if match else None
+
+def extrair_ator(texto):
+    match = re.search(r"filmes com ([a-zA-Zá-úãõç ]+)", texto, re.IGNORECASE)
+    return match.group(1).strip().title() if match else None
+
+def extrair_nota_minima(texto):
+    match = re.search(r"nota (?:acima de|maior que|superior a) (\d+(\.\d+)?)", texto, re.IGNORECASE)
+    return float(match.group(1)) if match else 0.0
+
+
+
+def buscar_filmes_filtrados(genero=None, diretor=None, ator=None, nota_min=0.0):
+    try:
+        query = supabase.table("Filme").select("*")
+
+        if genero:
+            query = query.contains("genero", [genero])
+        if diretor:
+            query = query.ilike("diretor", f"%{diretor}%")
+        if ator:
+            query = query.contains("elenco", [ator])
+
+        query = query.gte("avaliacaoMedia", nota_min)
+
+        query = query.order("avaliacaoMedia", desc=True).limit(10)
+        resultado = query.execute()
+
+        for filme in resultado.data:
+            print(f"{filme['titulo']} → Nota: {filme['avaliacaoMedia']}")
+
+        print(f"Consulta ao Supabase retornou {len(resultado.data)} filmes.")
+        return resultado.data
+
+    except Exception as e:
+        print(f"Erro ao consultar Supabase: {e}")
+        return []

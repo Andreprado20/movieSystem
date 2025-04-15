@@ -1,0 +1,30 @@
+SUPABASE_URL = "https://qoplwtzicemqpxytfzoj.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvcGx3dHppY2VtcXB4eXRmem9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMzNjk2MjYsImV4cCI6MjA1ODk0NTYyNn0.wYRh1hFXsmJPhZgPWJ1kioTXwioMIW_W-S9OWfnkoII"
+GEMINI_API_KEY = "AIzaSyCgvJ2IGtvMuAgLZOwJdwLkdiKpqCyJJ-M"
+
+Quero bons filmes de ação
+
+"Me vê filmes com Jason Momoa"
+"Me fala filmes do diretor David Ayer"
+
+
+def recomendar_com_gemini(pergunta_usuario, filmes):
+    if filmes:
+        filmes_str = "\n".join([
+            f"- {f['titulo']} ({f['avaliacaoMedia']:.1f})\n  Diretor: {f.get('diretor', 'Desconhecido')}\n  Elenco: {', '.join(f.get('elenco', []))}\n  Sinopse: {f.get('sinopse', 'Sem sinopse disponível')}" for f in filmes
+        ])
+    else:
+        filmes_str = "(nenhum filme encontrado com base na consulta)"
+
+    prompt = f"""
+O usuário perguntou: \"{pergunta_usuario}\"
+
+Filmes encontrados no banco de dados:
+
+{filmes_str}
+
+Com base nisso, responda diretamente ao usuário de forma natural. Se não houver filmes, explique de forma simpática. Caso existam, recomende os melhores com base nas informações acima. Não invente filmes fora da lista.
+"""
+
+    resposta = modelo.generate_content(prompt)
+    return resposta.text
