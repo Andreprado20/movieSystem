@@ -3,86 +3,52 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Eye, Heart, Clock, Star, Settings, HelpCircle } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
+import { Eye, Heart, Clock, Star, Settings, HelpCircle, UserPlus, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import MovieCard from "@/components/movie-card"
-
-interface Movie {
-  id: string
-  title: string
-  year: number
-  rating: number
-  posterUrl: string
-  genres: string[]
-}
-
-interface UserProfile {
-  username: string
-  displayName: string
-  bio: string
-  stats: {
-    watched: number
-    reviews: number
-    lists: number
-    followers: number
-    following: number
-  }
-}
+import { getUserById } from "@/lib/mock-data"
+import type { User } from "@/lib/types.ts"
 
 export default function ProfilePage() {
+  const params = useParams()
+  const router = useRouter()
+  const userId = params.id as string
   const [activeTab, setActiveTab] = useState("assistidos")
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [watchedMovies, setWatchedMovies] = useState<Movie[]>([])
-  const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([])
-  const [watchLaterMovies, setWatchLaterMovies] = useState<Movie[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [isOwnProfile, setIsOwnProfile] = useState(false)
+  const [isFollowing, setIsFollowing] = useState(false)
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        // Fetch user profile
-        const profileResponse = await fetch('http://localhost:3000/api/profile');
-        const profileData = await profileResponse.json();
-        setProfile(profileData);
+    // In a real app, you would fetch the user data from an API
+    // and check if this is the current user's profile
+    const userData = getUserById(userId)
+    setUser(userData)
 
-        // Fetch watched movies
-        const watchedResponse = await fetch('http://localhost:3000/api/profile/watched');
-        const watchedData = await watchedResponse.json();
-        setWatchedMovies(watchedData);
+    // For demo purposes, let's say user with ID "1" is the current user
+    setIsOwnProfile(userId === "1")
 
-        // Fetch favorite movies
-        const favoritesResponse = await fetch('http://localhost:3000/api/profile/favorites');
-        const favoritesData = await favoritesResponse.json();
-        setFavoriteMovies(favoritesData);
+    // For demo purposes, let's say we're following users with even IDs
+    setIsFollowing(Number.parseInt(userId) % 2 === 0)
+  }, [userId])
 
-        // Fetch watch later movies
-        const watchLaterResponse = await fetch('http://localhost:3000/api/profile/watchlater');
-        const watchLaterData = await watchLaterResponse.json();
-        setWatchLaterMovies(watchLaterData);
+  const handleFollowToggle = () => {
+    setIsFollowing(!isFollowing)
+    // In a real app, you would make an API call to follow/unfollow the user
+  }
 
-        // Fetch reviews
-        const reviewsResponse = await fetch('http://localhost:3000/api/profile/reviews');
-        const reviewsData = await reviewsResponse.json();
-        setReviews(reviewsData);
+  const handleMessage = () => {
+    // In a real app, you would navigate to a chat with this user
+    router.push(`/chat?conversation=user-${userId}`)
+  }
 
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, []);
-
-  if (loading) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-[#121212] text-white flex items-center justify-center">
-        <p>Carregando...</p>
+        <p>Carregando perfil...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -92,47 +58,79 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
           {/* Profile Picture */}
           <div className="relative w-40 h-40 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
-            <span className="text-xl text-gray-400">Foto</span>
+            {user.avatar ? (
+              <Image src={user.avatar || "/placeholder.svg"} alt={user.name} fill className="object-cover" />
+            ) : (
+              <span className="text-xl text-gray-400">{user.name.charAt(0)}</span>
+            )}
           </div>
 
           {/* Profile Info */}
           <div className="flex-1 flex flex-col items-center md:items-start">
             <div className="w-full flex flex-col md:flex-row md:justify-between">
               <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
-                <h1 className="text-2xl font-bold">{profile?.displayName}</h1>
-                <span className="text-gray-400">@{profile?.username}</span>
-                <Button className="rounded-full px-6 bg-white text-black hover:bg-gray-200">Seguir</Button>
+                <h1 className="text-2xl font-bold">{user.name}</h1>
+                <span className="text-gray-400">@{user.username}</span>
+
+                {!isOwnProfile && (
+                  <div className="flex gap-2">
+                    <Button
+                      className={`rounded-full px-6 ${
+                        isFollowing
+                          ? "bg-gray-700 text-white hover:bg-gray-600"
+                          : "bg-white text-black hover:bg-gray-200"
+                      }`}
+                      onClick={handleFollowToggle}
+                    >
+                      {isFollowing ? (
+                        <>Seguindo</>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Seguir
+                        </>
+                      )}
+                    </Button>
+                    <Button variant="outline" className="rounded-full border-gray-700" onClick={handleMessage}>
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white self-center md:self-start">
-                <Settings className="h-6 w-6" />
-              </Button>
+              {isOwnProfile && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-400 hover:text-white self-center md:self-start"
+                >
+                  <Settings className="h-6 w-6" />
+                </Button>
+              )}
             </div>
 
-            <p className="text-gray-300 mb-6 text-center md:text-left">
-              {profile?.bio}
-            </p>
+            <p className="text-gray-300 mb-6 text-center md:text-left">{user.bio}</p>
 
             {/* Stats */}
             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-center">
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{profile?.stats.watched}</span>
+                <span className="text-xl font-bold">{user.stats.watched}</span>
                 <span className="text-sm text-gray-400">Assistidos</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{profile?.stats.reviews}</span>
+                <span className="text-xl font-bold">{user.stats.reviews}</span>
                 <span className="text-sm text-gray-400">Críticas</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{profile?.stats.lists}</span>
+                <span className="text-xl font-bold">{user.stats.lists}</span>
                 <span className="text-sm text-gray-400">Listas</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{profile?.stats.followers}</span>
+                <span className="text-xl font-bold">{user.stats.followers}</span>
                 <span className="text-sm text-gray-400">Seguidores</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{profile?.stats.following}</span>
+                <span className="text-xl font-bold">{user.stats.following}</span>
                 <span className="text-sm text-gray-400">Seguindo</span>
               </div>
             </div>
@@ -165,7 +163,7 @@ export default function ProfilePage() {
           <TabsContent value="assistidos">
             <h2 className="text-2xl font-bold mb-6">Assistidos</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {watchedMovies.map((movie) => (
+              {user.movies.watched.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   id={movie.id}
@@ -182,7 +180,7 @@ export default function ProfilePage() {
           <TabsContent value="favoritos">
             <h2 className="text-2xl font-bold mb-6">Favoritos</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {favoriteMovies.map((movie) => (
+              {user.movies.favorites.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   id={movie.id}
@@ -199,7 +197,7 @@ export default function ProfilePage() {
           <TabsContent value="assistir-depois">
             <h2 className="text-2xl font-bold mb-6">Assistir depois</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {watchLaterMovies.map((movie) => (
+              {user.movies.watchLater.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   id={movie.id}
@@ -216,7 +214,7 @@ export default function ProfilePage() {
           <TabsContent value="criticas">
             <h2 className="text-2xl font-bold mb-6">Críticas</h2>
             <div className="space-y-6">
-              {reviews.map((review) => (
+              {user.reviews.map((review) => (
                 <div key={review.id} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex gap-4">
                     <div className="relative w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
@@ -233,14 +231,12 @@ export default function ProfilePage() {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${i < 4 ? "text-yellow-500" : "text-gray-600"}`}
-                            fill={i < 4 ? "currentColor" : "none"}
+                            className={`h-4 w-4 ${i < review.rating ? "text-yellow-500" : "text-gray-600"}`}
+                            fill={i < review.rating ? "currentColor" : "none"}
                           />
                         ))}
                       </div>
-                      <p className="text-sm text-gray-300">
-                        {review.comment}
-                      </p>
+                      <p className="text-sm text-gray-300">{review.content}</p>
                     </div>
                   </div>
                 </div>
