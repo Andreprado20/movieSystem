@@ -14,14 +14,20 @@ export default function Header() {
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2">
           <div className="relative w-8 h-8">
-            <Image src="/logo.png" alt="CineMatch Logo" width={32} height={32} className="rounded-full" />
+            <Image
+              src="/placeholder.svg?height=32&width=32&text=🎬"
+              alt="CineMatch Logo"
+              width={32}
+              height={32}
+              className="rounded-full bg-blue-500"
+            />
           </div>
           <h1 className="text-xl font-bold">CineMatch</h1>
         </Link>
       </div>
 
       <nav className="hidden md:flex items-center space-x-8">
-        <Link href="/" className={`hover:text-gray-300 ${pathname === "/" ? "text-white" : "text-gray-400"}`}>
+        <Link href="/home" className={`hover:text-gray-300 ${pathname === "/home" ? "text-white" : "text-gray-400"}`}>
           Início
         </Link>
         <Link
@@ -37,8 +43,8 @@ export default function Header() {
           Comunidades
         </Link>
         <Link
-          href="/perfil"
-          className={`hover:text-gray-300 ${pathname === "/perfil" ? "text-white" : "text-gray-400"}`}
+          href="/perfil/1"
+          className={`hover:text-gray-300 ${pathname.startsWith("/perfil") ? "text-white" : "text-gray-400"}`}
         >
           Perfil
         </Link>
@@ -50,4 +56,3 @@ export default function Header() {
     </header>
   )
 }
-

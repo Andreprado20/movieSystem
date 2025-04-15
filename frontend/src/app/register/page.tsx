@@ -8,15 +8,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [birthDate, setBirthDate] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [agreeTerms, setAgreeTerms] = useState(false)
   const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -27,104 +25,117 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/landing" className="flex items-center gap-3">
-            <div className="relative w-12 h-12">
-              <Image
-                src="/placeholder.svg?height=48&width=48&text=🎬"
-                alt="CineMatch Logo"
-                width={48}
-                height={48}
-                className="rounded-full bg-blue-500"
-              />
-            </div>
-            <h1 className="text-3xl font-bold text-white">CineMatch</h1>
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#121212] flex flex-col">
+      <div className="p-8">
+        <Link href="/landing" className="flex items-center gap-3">
+          <div className="relative w-10 h-10">
+            <Image
+              src="/placeholder.svg?height=40&width=40&text=🎬"
+              alt="CineMatch Logo"
+              width={40}
+              height={40}
+              className="rounded-full bg-blue-500"
+            />
+          </div>
+          <h1 className="text-2xl font-bold text-white">CineMatch</h1>
+        </Link>
+      </div>
 
-        <div className="bg-gray-800 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">Crie sua conta</h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome completo</Label>
+              <label htmlFor="name" className="block text-sm font-medium text-white">
+                Nome
+              </label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Seu nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
-                className="bg-gray-700 border-gray-600"
+                placeholder="seu nome"
+                className="bg-white text-black border-none h-12 text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <label htmlFor="email" className="block text-sm font-medium text-white">
+                Email
+              </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-gray-700 border-gray-600"
+                placeholder="seumail@gmail.com"
+                className="bg-white text-black border-none h-12 text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <label htmlFor="birthDate" className="block text-sm font-medium text-white">
+                Data de Nascimento
+              </label>
+              <Input
+                id="birthDate"
+                type="text"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                placeholder="00/00/0000"
+                className="bg-white text-black border-none h-12 text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium text-white">
+                Senha
+              </label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-gray-700 border-gray-600"
+                placeholder="Senha"
+                className="bg-white text-black border-none h-12 text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar senha</Label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white">
+                Confirmar Senha
+              </label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="bg-gray-700 border-gray-600"
+                placeholder="Senha"
+                className="bg-white text-black border-none h-12 text-base"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="terms"
-                checked={agreeTerms}
-                onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
-                required
-              />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-300"
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 bg-white text-black border-none h-12"
               >
-                Eu concordo com os{" "}
-                <Link href="/terms" className="text-blue-400 hover:text-blue-300">
-                  Termos de Serviço
-                </Link>{" "}
-                e{" "}
-                <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
-                  Política de Privacidade
-                </Link>
-              </label>
+                <Image
+                  src="/placeholder.svg?height=20&width=20&text=G"
+                  alt="Google Logo"
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+                Fazer login com o google
+              </Button>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 mt-6" disabled={!agreeTerms}>
-              Cadastrar
-            </Button>
+            <div>
+              <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200 h-12">
+                Cadastrar
+              </Button>
+            </div>
           </form>
 
           <div className="mt-6 text-center">
