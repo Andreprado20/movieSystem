@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# CineMatch
 
-First, run the development server:
+![CineMatch Logo](public/logo.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📝 Sobre o Projeto
+
+CineMatch é uma plataforma social para amantes de cinema compartilharem experiências, avaliações e organizarem eventos de exibição. O aplicativo permite que os usuários criem perfis, acompanhem filmes assistidos, façam críticas, participem de comunidades e interajam com outros cinéfilos.
+
+## ✨ Funcionalidades
+
+### 🏠 Página Inicial
+- Recomendações personalizadas de filmes
+- Sugestões baseadas em comunidades
+- Filmes mais bem avaliados
+- Recomendações baseadas no histórico de visualização
+
+### 👤 Perfil de Usuário
+- Exibição de filmes assistidos
+- Lista de favoritos
+- Lista de "assistir depois"
+- Críticas publicadas
+- Estatísticas de visualização
+- Seguidores e seguindo
+
+### 🎬 Página de Filme
+- Informações detalhadas sobre o filme
+- Elenco e equipe técnica
+- Avaliações e comentários de usuários
+- Opções para marcar como assistido, favorito ou assistir depois
+- Compartilhamento e agendamento de sessões
+
+### 📅 Calendário
+- Visualização de eventos de exibição
+- Criação de novos eventos
+- Participação em eventos da comunidade
+- Organização de maratonas de filmes
+
+### 👥 Comunidades
+- Grupos temáticos de discussão
+- Recomendações da comunidade
+- Eventos compartilhados
+- Interação entre membros
+
+### 💬 Chat
+- Conversas privadas entre usuários
+- Chats em grupo para comunidades
+- Discussões sobre filmes específicos
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Frontend**: Next.js, React, TypeScript
+- **Estilização**: Tailwind CSS, Shadcn/UI
+- **Roteamento**: Next.js App Router
+- **Gerenciamento de Estado**: React Hooks
+- **Ícones**: Lucide React
+- **Linting**: ESLint
+
+## 📁 Estrutura do Projeto
+
+```
+cinematch/
+├── public/               # Arquivos estáticos
+├── src/
+│   ├── app/              # Rotas da aplicação (App Router)
+│   │   ├── calendario/   # Página de calendário
+│   │   ├── chat/         # Página de chat
+│   │   ├── comunidades/  # Página de comunidades
+│   │   ├── faq/          # Página de perguntas frequentes
+│   │   ├── filme/        # Página de detalhes do filme
+│   │   ├── perfil/       # Página de perfil do usuário
+│   │   ├── globals.css   # Estilos globais
+│   │   ├── layout.tsx    # Layout principal
+│   │   └── page.tsx      # Página inicial
+│   ├── components/       # Componentes reutilizáveis
+│   │   ├── ui/           # Componentes de UI (shadcn)
+│   │   ├── header.tsx    # Componente de cabeçalho
+│   │   ├── sidebar.tsx   # Barra lateral
+│   │   └── movie-card.tsx # Card de filme
+│   ├── lib/              # Funções utilitárias
+│   └── hooks/            # React hooks personalizados
+├── eslint.config.js      # Configuração do ESLint
+├── next.config.mjs       # Configuração do Next.js
+├── package.json          # Dependências do projeto
+├── tailwind.config.ts    # Configuração do Tailwind CSS
+└── tsconfig.json         # Configuração do TypeScript
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Instalação e Configuração
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Pré-requisitos
+- Node.js 18.0.0 ou superior
+- npm ou yarn
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Passos para instalação
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/cinematch.git
+   cd cinematch
