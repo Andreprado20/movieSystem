@@ -13,7 +13,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Inicializa Gemini 2.0 Flash
 genai.configure(api_key=GEMINI_API_KEY)
-modelo = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
+modelo = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 
 
 
@@ -27,6 +27,7 @@ def recomendar_com_gemini(pergunta_usuario, filmes):
     else:
         filmes_str = "(nenhum filme encontrado com base na consulta)"
 
+    #print(filmes_str)
     prompt = f"""
 O usuário perguntou: \"{pergunta_usuario}\"
 
@@ -38,10 +39,12 @@ Sua tarefa é responder à pergunta do usuário de forma inteligente e relevante
 
 Interprete livremente a intenção do usuário. Por exemplo:
 - Se ele mencionar um diretor ou ator, procure nos campos correspondentes.
-- Se citar uma nota (ex: nota 7), leve em consideração a avaliação, mas caso a única opção seja um filme com nota baixa, retorne ele mesmo assim.
+- Se citar uma nota (ex: nota 5), leve em consideração a avaliação, mas caso a única opção seja um filme com nota baixa, retorne ele mesmo assim.
 - Se sugerir temas (como \"cão policial\"), procure na sinopse mesmo que o tema não esteja no título ou gênero.
 
 Recomende os filmes que mais se encaixam no que foi pedido. Seja natural, divertido e útil. Nunca invente filmes que não estão na lista.
+
+Seja muito divertido!! Para que o usuário fique feliz.
 """
 
     resposta = modelo.generate_content(prompt)
