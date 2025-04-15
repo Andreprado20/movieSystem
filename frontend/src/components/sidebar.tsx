@@ -16,7 +16,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-80 border-r border-gray-800 flex flex-col">
+    <aside className="w-full md:w-80 md:min-w-80 md:max-w-80 border-r border-gray-800 flex flex-col h-full bg-gray-900">
       {/* Tabs */}
       <div className="p-2">
         <Tabs defaultValue="conversas" className="w-full" onValueChange={setActiveTab}>
@@ -44,7 +44,7 @@ export default function Sidebar() {
               onClick={() => handleConversationClick("joao-pereira")}
             >
               <div className="flex items-center gap-3 p-2">
-                <Avatar className="h-10 w-10 border border-gray-700">
+                <Avatar className="h-10 w-10 border border-gray-700 flex-shrink-0">
                   <AvatarImage src="/avatar-joao.png" alt="João Pereira" />
                   <AvatarFallback className="bg-red-600 text-white">JP</AvatarFallback>
                 </Avatar>
@@ -63,7 +63,7 @@ export default function Sidebar() {
               onClick={() => handleConversationClick("grupo-cinefilos")}
             >
               <div className="flex items-center gap-3 p-2">
-                <Avatar className="h-10 w-10 border border-gray-700">
+                <Avatar className="h-10 w-10 border border-gray-700 flex-shrink-0">
                   <AvatarImage src="/avatar-grupo.png" alt="Grupo" />
                   <AvatarFallback className="bg-gray-600 text-white">GC</AvatarFallback>
                 </Avatar>
@@ -82,7 +82,7 @@ export default function Sidebar() {
               onClick={() => handleConversationClick("maria-silva")}
             >
               <div className="flex items-center gap-3 p-2">
-                <Avatar className="h-10 w-10 border border-gray-700">
+                <Avatar className="h-10 w-10 border border-gray-700 flex-shrink-0">
                   <AvatarImage src="/avatar-maria.png" alt="Maria Silva" />
                   <AvatarFallback className="bg-gray-600 text-white">MS</AvatarFallback>
                 </Avatar>
@@ -101,7 +101,7 @@ export default function Sidebar() {
               onClick={() => handleConversationClick("clube-filme")}
             >
               <div className="flex items-center gap-3 p-2">
-                <Avatar className="h-10 w-10 border border-gray-700">
+                <Avatar className="h-10 w-10 border border-gray-700 flex-shrink-0">
                   <AvatarImage src="/avatar-clube.png" alt="Clube do Filme" />
                   <AvatarFallback className="bg-gray-600 text-white">CF</AvatarFallback>
                 </Avatar>
@@ -119,7 +119,7 @@ export default function Sidebar() {
           <>
             <div className="p-2 hover:bg-gray-800/50 cursor-pointer">
               <div className="flex items-center gap-3 p-2">
-                <Avatar className="h-10 w-10 border border-gray-700">
+                <Avatar className="h-10 w-10 border border-gray-700 flex-shrink-0">
                   <AvatarImage src="/avatar-ana.png" alt="Ana Souza" />
                   <AvatarFallback className="bg-gray-600 text-white">AS</AvatarFallback>
                 </Avatar>
@@ -139,4 +139,3 @@ export default function Sidebar() {
     </aside>
   )
 }
-

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Sidebar from "@/components/sidebar"
 import ChatArea from "@/components/chat-area"
+import Header from "@/components/header"
 
 export default function ChatPage() {
   const searchParams = useSearchParams()
@@ -18,10 +19,19 @@ export default function ChatPage() {
   }, [searchParams])
 
   return (
-    <div className="flex h-full">
-      <Sidebar />
-      <ChatArea conversationId={activeConversation} />
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1 overflow-hidden w-full">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <div className="md:hidden w-full">
+          <Sidebar />
+        </div>
+        <div className="flex-1 w-full">
+          <ChatArea conversationId={activeConversation} />
+        </div>
+      </div>
     </div>
   )
 }
-

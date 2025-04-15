@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Header from "@/components/header"
 
 interface FAQItem {
   question: string
@@ -71,36 +72,39 @@ export default function FAQPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white pb-16">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-6">
-          <Button variant="secondary" className="bg-gray-600 hover:bg-gray-700" onClick={() => router.back()}>
-            Voltar
-          </Button>
-        </div>
+    <div className="min-h-screen bg-[#121212] text-white flex flex-col">
+      <Header />
+      <div className="flex-1 overflow-auto pb-16">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-end mb-6">
+            <Button variant="secondary" className="bg-gray-600 hover:bg-gray-700" onClick={() => router.back()}>
+              Voltar
+            </Button>
+          </div>
 
-        <h1 className="text-3xl font-bold text-center mb-12">Perguntas Frequentes</h1>
+          <h1 className="text-3xl font-bold text-center mb-12">Perguntas Frequentes</h1>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          {faqItems.map((item, index) => (
-            <div
-              key={index}
-              className="bg-gray-800/50 rounded-lg overflow-hidden cursor-pointer"
-              onClick={() => toggleFAQ(index)}
-            >
-              <div className="p-4 flex justify-between items-center">
-                <h3 className="font-medium text-lg">{item.question}</h3>
-                <div className="text-gray-400">
-                  {item.isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          <div className="max-w-3xl mx-auto space-y-4">
+            {faqItems.map((item, index) => (
+              <div
+                key={index}
+                className="bg-gray-800/50 rounded-lg overflow-hidden cursor-pointer"
+                onClick={() => toggleFAQ(index)}
+              >
+                <div className="p-4 flex justify-between items-center">
+                  <h3 className="font-medium text-lg">{item.question}</h3>
+                  <div className="text-gray-400">
+                    {item.isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  </div>
                 </div>
+                {item.isOpen && (
+                  <div className="px-4 pb-4 text-gray-300">
+                    <p>{item.answer}</p>
+                  </div>
+                )}
               </div>
-              {item.isOpen && (
-                <div className="px-4 pb-4 text-gray-300">
-                  <p>{item.answer}</p>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

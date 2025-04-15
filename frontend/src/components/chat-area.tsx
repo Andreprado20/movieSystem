@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -155,6 +155,7 @@ export default function ChatArea({ conversationId = "joao-pereira" }: ChatAreaPr
 
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Set the active conversation based on the conversationId prop
@@ -165,6 +166,11 @@ export default function ChatArea({ conversationId = "joao-pereira" }: ChatAreaPr
       setActiveConversation(conversations[Object.keys(conversations)[0]])
     }
   }, [conversationId, conversations])
+
+  useEffect(() => {
+    // Scroll to bottom when messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [activeConversation?.messages])
 
   const handleSendMessage = () => {
     if (!activeConversation || newMessage.trim() === "") return
@@ -213,49 +219,54 @@ export default function ChatArea({ conversationId = "joao-pereira" }: ChatAreaPr
   }
 
   if (!activeConversation) {
-    return <div className="flex-1 flex items-center justify-center">Selecione uma conversa</div>
+    return (
+      <div className="flex-1 flex items-center justify-center h-full">
+        <p className="text-gray-400">Selecione uma conversa</p>
+      </div>
+    )
   }
 
   return (
-    <main className="flex-1 flex flex-col">
+    <main className="flex flex-col h-full w-full">
       {/* Chat Header */}
-      <div className="p-4 border-b border-gray-800 flex items-center gap-3">
-        <Avatar className="h-12 w-12 border border-gray-700">
-          <AvatarImage src={activeConversation.avatar} alt={activeConversation.name} />
+      <div className="p-4 border-b border-gray-800 flex items-center gap-3 bg-gray-900 w-full">
+        <Avatar className="h-10 w-10 md:h-12 md:w-12 border border-gray-700">
+          <AvatarImage src={activeConversation.avatar || "/placeholder.svg"} alt={activeConversation.name} />
           <AvatarFallback className={`${activeConversation.color} text-white`}>
             {activeConversation.initials}
           </AvatarFallback>
         </Avatar>
         <div>
-          <h2 className="font-medium text-lg">{activeConversation.name}</h2>
-          <p className="text-sm text-gray-400">{activeConversation.status}</p>
+          <h2 className="font-medium text-base md:text-lg">{activeConversation.name}</h2>
+          <p className="text-xs md:text-sm text-gray-400">{activeConversation.status}</p>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 w-full">
         {activeConversation.messages.map((message) => (
-          <div key={message.id} className={`flex ${message.isOwn ? "flex-row-reverse" : ""} items-start gap-3`}>
-            <Avatar className="h-8 w-8 border border-gray-700 mt-1">
-              <AvatarImage src={message.sender.avatar} alt={message.sender.name} />
+          <div key={message.id} className={`flex ${message.isOwn ? "flex-row-reverse" : ""} items-start gap-3 w-full`}>
+            <Avatar className="h-8 w-8 border border-gray-700 mt-1 flex-shrink-0">
+              <AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={message.sender.name} />
               <AvatarFallback className={`${message.sender.color} text-white`}>
                 {message.sender.initials}
               </AvatarFallback>
             </Avatar>
-            <div className={`space-y-1 ${message.isOwn ? "items-end flex flex-col" : ""}`}>
-              <div className={`${message.isOwn ? "bg-blue-600" : "bg-gray-800"} rounded-lg p-3 max-w-md`}>
+            <div className={`space-y-1 ${message.isOwn ? "items-end flex flex-col" : ""} max-w-[75%] md:max-w-[60%]`}>
+              <div className={`${message.isOwn ? "bg-blue-600" : "bg-gray-800"} rounded-lg p-3 break-words`}>
                 <p>{message.content}</p>
               </div>
               <p className="text-xs text-gray-500">{message.timestamp}</p>
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}
-      <div className="p-3 border-t border-gray-800 flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="text-gray-400">
-          <Smile className="h-6 w-6" />
+      <div className="p-3 border-t border-gray-800 flex items-center gap-2 bg-gray-900 w-full">
+        <Button variant="ghost" size="icon" className="text-gray-400 flex-shrink-0">
+          <Smile className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
         <Input
           placeholder="Digite sua mensagem..."
@@ -264,11 +275,14 @@ export default function ChatArea({ conversationId = "joao-pereira" }: ChatAreaPr
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <Button size="icon" className="rounded-full bg-blue-600 hover:bg-blue-700" onClick={handleSendMessage}>
-          <Send className="h-5 w-5" />
+        <Button
+          size="icon"
+          className="rounded-full bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+          onClick={handleSendMessage}
+        >
+          <Send className="h-4 w-4 md:h-5 md:w-5" />
         </Button>
       </div>
     </main>
   )
 }
-
