@@ -1,4 +1,3 @@
-# titulo qualquer
 # Documentação do Sistema de Recomendação de Filmes com Supabase e Gemini
 
 ## 1. Objetivo do Projeto
