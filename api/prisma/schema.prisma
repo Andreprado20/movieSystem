@@ -16,6 +16,8 @@ model Usuario {
   email  String   @unique
   senha  String
   perfis Perfil[]
+  comentarios Comentario[]
+  comentariosRecebidos Comentario[] @relation("RespostaComentario")
 }
 
 model Perfil {
@@ -26,7 +28,7 @@ model Perfil {
   usuario          Usuario          @relation(fields: [usuario_id], references: [id])
   usuario_id       Int
   notificacoes     Notificacao[]
-  posts            Post[]
+  comentarios      Comentario[]
   avaliacoes       Avaliacao[]
   eventos          Evento[]
   recomendacoes    Recomendacao[]
@@ -60,22 +62,24 @@ model Filme {
 }
 
 model Forum {
-  id        Int    @id @default(autoincrement())
-  titulo    String
-  categoria String
-  filme     Filme  @relation(fields: [filme_id], references: [id])
-  filme_id  Int
-  posts     Post[]
+  id          Int          @id @default(autoincrement())
+  filme       Filme        @relation(fields: [filme_id], references: [id])
+  filme_id    Int
+  comentarios Comentario[]
 }
 
-model Post {
-  id        Int    @id @default(autoincrement())
-  autor     String
-  conteudo  String
-  perfil    Perfil @relation(fields: [perfil_id], references: [id])
-  perfil_id Int
-  forum     Forum  @relation(fields: [forum_id], references: [id])
-  forum_id  Int
+model Comentario {
+  id             Int      @id @default(autoincrement())
+  mensagem       String
+  likes          Int      @default(0)
+  usuario        Usuario  @relation(fields: [usuario_id], references: [id])
+  usuario_id     Int
+  perfil         Perfil   @relation(fields: [perfil_id], references: [id])
+  perfil_id      Int
+  forum          Forum    @relation(fields: [forum_id], references: [id])
+  forum_id       Int
+  respondendo    Usuario? @relation("RespostaComentario", fields: [respondendo_id], references: [id])
+  respondendo_id Int?
 }
 
 model Avaliacao {

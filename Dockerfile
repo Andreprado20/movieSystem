@@ -33,6 +33,7 @@ USER appuser
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV DEV_MODE=true
 
 # Expose port
 EXPOSE 8000
