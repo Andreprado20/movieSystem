@@ -17,6 +17,7 @@ from fastapi.openapi.utils import get_openapi
 
 from app.v1.movies.routes import movies_routes
 from app.v1.user.routes import user_routes
+from app.auth import setup_firebase_auth_hooks
 
 # Configurar logging
 logger = logging.getLogger(__name__)
@@ -25,14 +26,8 @@ health = APIRouter(tags=["health"], responses={404: {"description": "Not found"}
 
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-# Log Supabase configuration (mask the key for security)
-if SUPABASE_URL and SUPABASE_KEY:
-    logger.info(f"Supabase URL: {SUPABASE_URL}")
-    logger.info(f"Supabase Key: {SUPABASE_KEY[:10]}...")
-else:
-    logger.error("Missing Supabase configuration")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")  # anon key for public operations
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")  # service_role key for admin operations
 
 
 @health.get("/health")
@@ -56,10 +51,12 @@ async def lifespan(app: FastAPI):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
 
-    # Initialize Supabase client
-    logger.info("Initializing Supabase client")
-    app.state.supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    logger.info("Supabase client initialized successfully")
+    # Initialize Supabase client - use service role key for admin operations if available
+    supabase_key = SUPABASE_SERVICE_KEY if SUPABASE_SERVICE_KEY else SUPABASE_KEY
+    app.state.supabase = create_client(SUPABASE_URL, supabase_key)
+    
+    # Initialize Firebase-Supabase user synchronization
+    app.state.user_synchronizer = setup_firebase_auth_hooks(app.state.supabase)
     
     yield
 

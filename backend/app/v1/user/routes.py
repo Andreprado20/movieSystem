@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from app.v1.user.schemas import UserCreate, UserUpdate, UserResponse
 from app.v1.user.helper import *
 
@@ -6,10 +6,10 @@ user_routes = APIRouter(prefix="/v1/users", tags=["Users"])
 
 
 @user_routes.post("/", response_model=UserResponse)
-async def create_user_route(user: UserCreate):
+async def create_user_route(user: UserCreate, request: Request):
     """Rota para criar um novo usuário."""
     try:
-        return create_user(user)
+        return create_user(user, request)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     

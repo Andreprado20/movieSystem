@@ -1,15 +1,33 @@
 import firebase_admin
 from firebase_admin import auth
 from app.v1.user.schemas import *
+from fastapi import Depends, Request
+import logging
 
+logger = logging.getLogger(__name__)
 
-def create_user(user_data: UserCreate) -> UserResponse:
-    """Cria um novo usuário no Firebase Authentication."""
+async def get_user_synchronizer(request: Request):
+    return request.app.state.user_synchronizer
+
+def create_user(user_data: UserCreate, request: Request = None) -> UserResponse:
+    """Cria um novo usuário no Firebase Authentication e sincroniza com Supabase."""
+    # Create user in Firebase
     user = auth.create_user(
         email=user_data.email,
         password=user_data.password,
         display_name=user_data.display_name,
     )
+    
+    # Synchronize with Supabase if request is provided
+    if request and hasattr(request.app.state, 'user_synchronizer'):
+        import asyncio
+        try:
+            # Run synchronization asynchronously
+            loop = asyncio.get_event_loop()
+            loop.create_task(request.app.state.user_synchronizer.create_user_in_supabase(user))
+        except Exception as e:
+            logger.error(f"Error scheduling user synchronization: {str(e)}")
+    
     return UserResponse(uid=user.uid, email=user.email, display_name=user.display_name)
 
 
