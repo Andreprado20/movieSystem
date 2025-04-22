@@ -44,6 +44,10 @@ export default function ProfilePage() {
     router.push(`/chat?conversation=user-${userId}`)
   }
 
+  const handleSettingsClick = () => {
+    router.push("/perfil/configuracoes")
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-[#121212] text-white flex flex-col">
@@ -109,6 +113,7 @@ export default function ProfilePage() {
                     variant="ghost"
                     size="icon"
                     className="text-gray-400 hover:text-white self-center md:self-start"
+                    onClick={handleSettingsClick}
                   >
                     <Settings className="h-6 w-6" />
                   </Button>
