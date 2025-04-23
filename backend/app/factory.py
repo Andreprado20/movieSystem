@@ -19,6 +19,7 @@ from app.v1.movies.routes import movies_routes
 from app.v1.user.routes import user_routes
 from app.v1.forum.routes import forum_routes
 from app.v1.movielist.routes import movielist_routes
+from app.v1.chat.routes import chat_routes
 from app.auth import setup_firebase_auth_hooks
 
 # Configurar logging
@@ -89,5 +90,6 @@ def create_app():
     app.include_router(user_routes)
     app.include_router(forum_routes)
     app.include_router(movielist_routes)
+    app.include_router(chat_routes)
     
     return app
