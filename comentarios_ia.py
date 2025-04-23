@@ -27,16 +27,27 @@ def resumir_avaliacoes_com_gemini(pergunta_usuario, avaliacoes):
         media = 0.0
 
     prompt = f"""
-O usuário perguntou: \"{pergunta_usuario}\"
+O usuário perguntou: "{pergunta_usuario}"
 
-Avaliações encontradas no banco de dados:
+Você recebeu as seguintes avaliações do banco de dados:
 
 {avaliacoes_str}
 
-Com base nas avaliações acima (nota, curtidas e comentário), gere apenas uma pequena frase resumindo o que os comentários acharam do filme. 
-A média das notas é {media:.2f}, escreva ela na frase. Identifique se o sentimento geral é positivo, misto ou negativo. Destaque pontos positivos e negativos mencionados, mesmo que subjetivos. 
+Sua tarefa é gerar um resumo similar aos utilizados em e-commerces, considerando a média geral das notas ({media:.2f}/10) e o conteúdo dos comentários. Faça o seguinte:
 
-Nunca invente avaliações que não estão listadas.
+Destaque logo no início a média das avaliações (ex: "O filme recebeu uma média de 4.56/10").
+
+Escreva um parágrafo breve, explicando como os espectadores descreveram o filme (ex: "Usuários elogiaram..."; "Alguns mencionaram...").
+
+Liste em formato de marcadores (bullet points) os pontos positivos e negativos mais mencionados nos comentários.
+
+Importante:
+
+Não invente informações que não estejam presentes nas avaliações.
+
+Seja fiel ao conteúdo textual, mas escreva de forma natural e acessível.
+
+Utilize linguagem clara, objetiva e respeitosa.
 """
 
     resposta = modelo.generate_content(prompt)

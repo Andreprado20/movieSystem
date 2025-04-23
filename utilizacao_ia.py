@@ -1,5 +1,3 @@
-import os
-import re
 import google.generativeai as genai
 from supabase import create_client, Client
 

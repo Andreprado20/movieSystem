@@ -30,3 +30,5 @@ Com base nisso, responda diretamente ao usuário de forma natural. Se não houve
 
     resposta = modelo.generate_content(prompt)
     return resposta.text
+
+
