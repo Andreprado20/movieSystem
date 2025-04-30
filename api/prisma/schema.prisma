@@ -159,3 +159,36 @@ model FilmesWatchLater {
 
   @@unique([perfil_id, filme_id])
 }
+
+model ChatGroup {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  isPrivate   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  createdBy   String
+  members     GroupMember[]
+  messages    Message[]
+}
+
+model GroupMember {
+  id        String    @id @default(uuid())
+  userId    String
+  groupId   String
+  role      String    @default("member")
+  joinedAt  DateTime  @default(now())
+  group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  content   String
+  groupId   String
+  senderId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  isEdited  Boolean   @default(false)
+  group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
