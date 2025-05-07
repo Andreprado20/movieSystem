@@ -1,0 +1,20 @@
+services:
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+
+  api:
+    build:
+      context: ./ia-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ia-service:/app
+    environment:
+      - PYTHONUNBUFFERED=1
