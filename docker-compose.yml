@@ -1,17 +1,8 @@
-version: "3.8"
-
+version: "3.9"
 services:
-  ia-service:
-    build: ./ia-service
-    container_name: ia-service
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./ia-service/.env
-
   app:
     build: ./app
     ports:
-      - "8001:8001"
+      - "8000:8000"
     env_file:
       - ./app/.env
