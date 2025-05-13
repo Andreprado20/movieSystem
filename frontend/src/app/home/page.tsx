@@ -9,7 +9,7 @@ import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Header from "@/components/header"
-import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { TextFormatter } from "@/components/text-formatter"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -153,8 +153,8 @@ export default function HomePage() {
             {error && !isLoading && <div className="text-red-400 py-4">{error}</div>}
 
             {aiRecommendation && !isLoading && !error && (
-              <div className="overflow-auto">
-                <MarkdownRenderer content={aiRecommendation} />
+              <div className="overflow-auto formatted-content">
+                <TextFormatter content={aiRecommendation} />
               </div>
             )}
           </div>

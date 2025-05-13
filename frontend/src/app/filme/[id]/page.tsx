@@ -8,28 +8,31 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Header from "@/components/header"
 import { TextFormatter } from "@/components/text-formatter"
+import { getMovieById } from "@/libs/mock-data"
 
 // Define types based on the Prisma schema
 interface Filme {
-  id: number
-  titulo: string
-  sinopse?: string
-  diretor?: string
-  elenco: string[]
-  genero: string[]
-  avaliacaoMedia: number
-  avaliacoes?: Avaliacao[]
+  id: string
+  title: string
+  year: number
+  rating: number
+  posterUrl: string
+  genres: string[]
+  synopsis?: string
+  director?: string
+  cast?: string[]
+  reviews?: Avaliacao[]
 }
 
 interface Avaliacao {
-  id: number
-  nota: number
-  comentario?: string
-  curtidas: number
-  perfil: {
-    id: number
-    nome: string
-    tipo: string
+  id: string
+  rating: number
+  content?: string
+  likes?: number
+  user: {
+    id: string
+    name: string
+    username: string
   }
 }
 
@@ -52,15 +55,37 @@ export default function MoviePage() {
     const fetchMovie = async () => {
       try {
         setLoading(true)
-        // Fetch movie data from the NestJS API
-        const response = await fetch(`http://localhost:3000/filmes/${id}`)
+        // Get movie data from mock data instead of API
+        const data = getMovieById(id as string)
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch movie: ${response.statusText}`)
+        if (!data) {
+          throw new Error("Movie not found")
         }
 
-        const data = await response.json()
-        setMovie(data)
+        // Transform the data to match our component's expected format
+        const transformedData: Filme = {
+          id: data.id,
+          titulo: data.title,
+          sinopse: data.synopsis || "Sinopse não disponível",
+          diretor: data.director,
+          elenco: data.cast || [],
+          genero: data.genres,
+          avaliacaoMedia: data.rating,
+          avaliacoes:
+            data.reviews?.map((review) => ({
+              id: review.id,
+              nota: review.rating,
+              comentario: review.content,
+              curtidas: review.likes || 0,
+              perfil: {
+                id: review.user.id,
+                nome: review.user.name,
+                tipo: review.user.username,
+              },
+            })) || [],
+        }
+
+        setMovie(transformedData)
       } catch (err) {
         console.error("Error fetching movie:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch movie data")
@@ -83,35 +108,16 @@ export default function MoviePage() {
         setSummaryLoading(true)
         setSummaryError(null)
 
-        // Get the AI service URL from environment variables
-        const aiServiceUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-
-        console.log(`Fetching review summary for movie ID: ${movie.id}`)
-
-        const response = await fetch(`${aiServiceUrl}/resumo`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filme_id: movie.id }),
-        })
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-
-        const data = await response.json()
-        console.log("Review summary response:", data)
-
-        if (data.resumo) {
-          setReviewSummary(data.resumo)
-        } else {
-          setSummaryError("Não foi possível gerar um resumo das avaliações")
-        }
+        // Simulate API call with a timeout
+        setTimeout(() => {
+          // Generate a mock summary based on the movie title
+          const mockSummary = `Os usuários geralmente elogiam "${movie.titulo}" pela sua narrativa envolvente e atuações convincentes. A maioria dos comentários destaca a qualidade técnica e a direção do filme.`
+          setReviewSummary(mockSummary)
+          setSummaryLoading(false)
+        }, 1500)
       } catch (err) {
         console.error("Error fetching review summary:", err)
         setSummaryError("Erro ao carregar o resumo das avaliações")
-      } finally {
         setSummaryLoading(false)
       }
     }
@@ -156,7 +162,7 @@ export default function MoviePage() {
   }
 
   // Generate a placeholder image URL if no poster is available
-  const posterUrl = `/placeholder.svg?height=400&width=270&text=${encodeURIComponent(movie.titulo)}`
+  const posterUrl = movie.posterUrl || `/placeholder.svg?height=400&width=270&text=${encodeURIComponent(movie.titulo)}`
 
   return (
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
