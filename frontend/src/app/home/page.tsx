@@ -9,6 +9,7 @@ import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Header from "@/components/header"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -134,10 +135,10 @@ export default function HomePage() {
 
       {/* AI Recommendation Section */}
       {(isLoading || aiRecommendation || error) && (
-        <section className="px-12 mb-12">
-          <div className="bg-gray-800/50 rounded-lg p-6 max-w-4xl mx-auto">
+        <section className="px-4 md:px-12 mb-12">
+          <div className="bg-gray-800/50 rounded-lg p-4 md:p-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Recomendações da IA</h2>
+              <h2 className="text-xl md:text-2xl font-bold">Recomendações da IA</h2>
               <Button variant="ghost" size="sm" onClick={clearSearch} className="text-gray-400 hover:text-white">
                 Fechar
               </Button>
@@ -152,8 +153,8 @@ export default function HomePage() {
             {error && !isLoading && <div className="text-red-400 py-4">{error}</div>}
 
             {aiRecommendation && !isLoading && !error && (
-              <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-line">{aiRecommendation}</div>
+              <div className="overflow-auto">
+                <MarkdownRenderer content={aiRecommendation} />
               </div>
             )}
           </div>
@@ -161,11 +162,11 @@ export default function HomePage() {
       )}
 
       {/* Movie Sections */}
-      <div className="px-12 pb-16 space-y-12">
+      <div className="px-4 md:px-12 pb-16 space-y-12">
         {/* Recommended Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Recomendados para você</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Recomendados para você</h2>
             <Link href="/recomendados" className="text-sm text-gray-400 hover:text-white">
               Ver todos
             </Link>
@@ -189,7 +190,7 @@ export default function HomePage() {
         {/* Community Suggestions Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Sugeridos pelas suas Comunidades</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Sugeridos pelas suas Comunidades</h2>
             <Link href="/comunidades-sugestoes" className="text-sm text-gray-400 hover:text-white">
               Ver todos
             </Link>
@@ -213,7 +214,7 @@ export default function HomePage() {
         {/* Top Rated Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Mais bem avaliados</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Mais bem avaliados</h2>
             <Link href="/top-rated" className="text-sm text-gray-400 hover:text-white">
               Ver todos
             </Link>
@@ -237,7 +238,7 @@ export default function HomePage() {
         {/* Because You Watched Section */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Porque você assistiu "Autentic Games: Namorada Perfeita"</h2>
+            <h2 className="text-xl md:text-2xl font-bold">Porque você assistiu "Autentic Games: Namorada Perfeita"</h2>
             <Link href="/because-you-watched" className="text-sm text-gray-400 hover:text-white">
               Ver todos
             </Link>

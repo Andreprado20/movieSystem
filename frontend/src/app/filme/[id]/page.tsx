@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
-import { Clock, Star, Heart, Share2, Calendar, Settings } from "lucide-react"
+import { Clock, Star, Heart, Share2, Calendar, Settings, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Header from "@/components/header"
+import { TextFormatter } from "@/components/text-formatter"
 
 // Define types based on the Prisma schema
 interface Filme {
@@ -42,6 +43,11 @@ export default function MoviePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // New states for AI summary
+  const [reviewSummary, setReviewSummary] = useState<string | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
+
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -67,6 +73,53 @@ export default function MoviePage() {
       fetchMovie()
     }
   }, [id])
+
+  // New effect to fetch AI summary when movie data is loaded
+  useEffect(() => {
+    const fetchReviewSummary = async () => {
+      if (!movie || !movie.id) return
+
+      try {
+        setSummaryLoading(true)
+        setSummaryError(null)
+
+        // Get the AI service URL from environment variables
+        const aiServiceUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
+        console.log(`Fetching review summary for movie ID: ${movie.id}`)
+
+        const response = await fetch(`${aiServiceUrl}/resumo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ filme_id: movie.id }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`)
+        }
+
+        const data = await response.json()
+        console.log("Review summary response:", data)
+
+        if (data.resumo) {
+          setReviewSummary(data.resumo)
+        } else {
+          setSummaryError("Não foi possível gerar um resumo das avaliações")
+        }
+      } catch (err) {
+        console.error("Error fetching review summary:", err)
+        setSummaryError("Erro ao carregar o resumo das avaliações")
+      } finally {
+        setSummaryLoading(false)
+      }
+    }
+
+    if (movie && movie.id) {
+      fetchReviewSummary()
+    }
+  }, [movie])
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite)
@@ -203,8 +256,34 @@ export default function MoviePage() {
           </div>
         </div>
 
+        {/* AI Review Summary Section */}
+        {(reviewSummary || summaryLoading || summaryError) && (
+          <div className="mt-8 px-4 md:px-8 lg:px-16">
+            <div className="bg-gray-800/50 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <MessageSquare className="h-5 w-5 text-blue-400" />
+                <h2 className="text-xl font-bold">O que os usuários estão dizendo</h2>
+              </div>
+
+              {summaryLoading && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                </div>
+              )}
+
+              {summaryError && <div className="text-red-400 py-4">{summaryError}</div>}
+
+              {reviewSummary && !summaryLoading && (
+                <div className="bg-gray-700/50 rounded-lg p-4">
+                  <TextFormatter content={reviewSummary} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Comments Section */}
-        <div className="mt-12 px-4 md:px-8 lg:px-16">
+        <div className="mt-8 px-4 md:px-8 lg:px-16">
           <h2 className="text-2xl font-bold mb-6">Comentários</h2>
           {movie.avaliacoes && movie.avaliacoes.length > 0 ? (
             <div className="space-y-4">
