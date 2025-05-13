@@ -1,12 +1,23 @@
 services:
-  web:
+  # web:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  
+  comment:
     build:
-      context: ./frontend
+      context: ./ia-comentarios
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8001:8000"
     volumes:
-      - ./frontend:/app
+      - ./ia-comentarios:/app
+    environment:
+      - PYTHONUNBUFFERED=1
 
   api:
     build:
