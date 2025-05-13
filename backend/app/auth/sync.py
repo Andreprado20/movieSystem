@@ -173,3 +173,6 @@ def setup_firebase_auth_hooks(supabase_client: Client):
     # synchronization after user creation in our API routes
     
     return synchronizer 
+
+def get_current_user():
+    return 0

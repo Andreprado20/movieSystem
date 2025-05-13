@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.v1.chat.models import GroupCreate, Group, MessageCreate, Message
 from app.v1.chat.service import ChatService
-from app.auth.auth import get_current_user
+from app.auth.sync import get_current_user
 
 # Websocket connections manager
 class ConnectionManager:

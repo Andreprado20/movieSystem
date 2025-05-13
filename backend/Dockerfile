@@ -1,10 +1,14 @@
 # Build stage
 FROM python:3.12-slim as builder
 
+RUN pip install poetry
+
 WORKDIR /app
 
 # Copy project files
-COPY backend/pyproject.toml backend/poetry.lock backend/README.md ./
+COPY ./pyproject.toml ./README.md ./
+
+RUN poetry lock
 # Create package structure
 RUN mkdir -p app && touch app/__init__.py
 
@@ -21,9 +25,9 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code and environment file
-COPY backend/app ./app
-COPY backend/run.py .
-COPY backend/.env /app/.env
+COPY ./app ./app
+COPY ./run.py .
+COPY ./.env /app/.env
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
