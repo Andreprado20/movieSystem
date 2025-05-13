@@ -4,6 +4,7 @@ import google.generativeai as genai
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,12 +18,23 @@ print(f"SUPABASE_URL: {SUPABASE_URL}")
 print(f"SUPABASE_KEY: {SUPABASE_KEY}")
 print(f"GEMINI_API_KEY: {GEMINI_API_KEY}")
 
+
+
 # Inicialização
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 modelo = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 
 app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # In production, replace with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Pergunta(BaseModel):
     pergunta: str

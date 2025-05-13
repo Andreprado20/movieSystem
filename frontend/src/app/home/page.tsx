@@ -58,7 +58,13 @@ export default function HomePage() {
     setError(null)
 
     try {
-      const response = await fetch("/api/ai-recommendations", {
+      console.log("Sending request to AI service...")
+
+      // Make a direct request to the Python microservice
+      // This assumes the microservice is accessible from the client
+      const aiServiceUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
+      const response = await fetch(`${aiServiceUrl}/responder`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,11 +72,14 @@ export default function HomePage() {
         body: JSON.stringify({ pergunta: searchQuery }),
       })
 
+      console.log("Response status:", response.status)
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+        throw new Error(`Error: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
+      console.log("Received data:", data)
       setAiRecommendation(data.resposta)
     } catch (err) {
       console.error("Failed to fetch AI recommendations:", err)
