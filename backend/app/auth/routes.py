@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 import jwt
 from pydantic import BaseModel
+import firebase_admin
+from firebase_admin import auth
 
 from app.auth.sync import get_current_user, create_access_token, verify_password, get_password_hash
 
@@ -103,14 +105,25 @@ async def login_user(form_data: UserLogin, request: Request):
         
         user = user_query.data[0]
         
-        # Verify password
-        if not verify_password(form_data.password, user["senha"]):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+        # Check if this is a Firebase user
+        is_firebase_user = user.get("auth_provider") == "firebase" or user.get("firebase_uid") is not None
+        
+        if is_firebase_user:
+            # For Firebase users, we should redirect to Firebase authentication
+            # We don't authenticate Firebase users with password here
+            raise HTTPException(
+                status_code=400, 
+                detail="This account uses Firebase authentication. Please use the Firebase login method."
+            )
+        else:
+            # Legacy password authentication
+            if not verify_password(form_data.password, user["senha"]):
+                raise HTTPException(status_code=401, detail="Invalid credentials")
         
         # Create access token
         access_token = create_access_token(data={"sub": user["id"]})
         
-        # Create refresh token (in a real app, you'd store this in a database)
+        # Create refresh token
         refresh_token = create_access_token(
             data={"sub": user["id"], "type": "refresh"},
             expires_delta=timedelta(days=30)
@@ -221,4 +234,65 @@ async def google_auth(google_data: GoogleAuthRequest, request: Request):
             "token_type": "bearer"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
+
+@auth_routes.get("/verify-token")
+async def verify_token(current_user: Dict[str, Any] = Depends(get_current_user)):
+    """Test endpoint to verify a token is valid"""
+    return {"message": "Token is valid", "user": current_user}
+
+@auth_routes.post("/firebase-login", response_model=Dict[str, Any])
+async def firebase_login(id_token: str = Body(..., embed=True), request: Request = None):
+    """Verify Firebase ID token and return user info"""
+    try:
+        # Verify the token
+        from firebase_admin import auth
+        decoded_token = auth.verify_id_token(id_token)
+        user_id = decoded_token["uid"]
+        
+        # Check if user exists in our database
+        supabase = request.app.state.supabase if request else None
+        
+        if supabase:
+            # Get user from database
+            user_query = supabase.table("Usuario").select("*").eq("firebase_uid", user_id).execute()
+            
+            if not user_query.data or len(user_query.data) == 0:
+                # If user doesn't exist in our DB but exists in Firebase,
+                # we should sync them to our DB
+                firebase_user = auth.get_user(user_id)
+                
+                if hasattr(request.app.state, "user_synchronizer"):
+                    await request.app.state.user_synchronizer.create_user_in_supabase(firebase_user)
+                    
+                    # Get the newly created user
+                    user_query = supabase.table("Usuario").select("*").eq("firebase_uid", user_id).execute()
+            
+            if user_query.data and len(user_query.data) > 0:
+                user_data = user_query.data[0]
+                return {
+                    "user": {
+                        "id": user_data["id"],
+                        "firebase_uid": user_id,
+                        "name": user_data["nome"],
+                        "email": user_data["email"]
+                    },
+                    "id_token": id_token,
+                    "token_type": "bearer"
+                }
+        
+        # If we can't find or create a user record, just return the Firebase token info
+        return {
+            "user": {
+                "firebase_uid": user_id,
+                "email": decoded_token.get("email", ""),
+                "name": decoded_token.get("name", "")
+            },
+            "id_token": id_token,
+            "token_type": "bearer"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Invalid Firebase token: {str(e)}"
+        ) 

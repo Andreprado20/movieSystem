@@ -11,21 +11,22 @@ datasource db {
 }
 
 model Usuario {
-  id     Int      @id @default(autoincrement())
-  nome   String
-  email  String   @unique
-  senha  String
-  perfis Perfil[]
-  comentarios Comentario[]
-  comentariosRecebidos Comentario[] @relation("RespostaComentario")
+  id             Int      @id @default(autoincrement())
+  nome           String
+  email          String   @unique
+  senha          String
+  firebase_uid   String?  @unique
+  supabase_uid   String?  @unique
+  auth_provider  String?
+  perfis         Perfil[]
 }
 
 model Perfil {
-  id               Int              @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   tipo             String
   nome             String
   descricao        String?
-  usuario          Usuario          @relation(fields: [usuario_id], references: [id])
+  usuario          Usuario            @relation(fields: [usuario_id], references: [id])
   usuario_id       Int
   notificacoes     Notificacao[]
   comentarios      Comentario[]
@@ -45,13 +46,15 @@ model Notificacao {
 }
 
 model Filme {
-  id             Int              @id @default(autoincrement())
+  id             Int                @id @default(autoincrement())
   titulo         String
   sinopse        String?
   diretor        String?
   elenco         String[]
   genero         String[]
-  avaliacaoMedia Float            @default(0.0)
+  avaliacaoMedia Float              @default(0.0)
+  id_tmdb        String?            @unique
+  poster_path    String?
   forums         Forum[]
   avaliacoes     Avaliacao[]
   enquetes       Enquete[]
@@ -69,17 +72,16 @@ model Forum {
 }
 
 model Comentario {
-  id             Int      @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   mensagem       String
-  likes          Int      @default(0)
-  usuario        Usuario  @relation(fields: [usuario_id], references: [id])
-  usuario_id     Int
-  perfil         Perfil   @relation(fields: [perfil_id], references: [id])
+  likes          Int          @default(0)
+  perfil         Perfil       @relation(fields: [perfil_id], references: [id])
   perfil_id      Int
-  forum          Forum    @relation(fields: [forum_id], references: [id])
+  forum          Forum        @relation(fields: [forum_id], references: [id])
   forum_id       Int
-  respondendo    Usuario? @relation("RespostaComentario", fields: [respondendo_id], references: [id])
+  respondendo    Comentario?  @relation("RespostaComentario", fields: [respondendo_id], references: [id])
   respondendo_id Int?
+  respostas      Comentario[] @relation("RespostaComentario")
 }
 
 model Avaliacao {
@@ -172,12 +174,12 @@ model ChatGroup {
 }
 
 model GroupMember {
-  id        String    @id @default(uuid())
-  userId    String
-  groupId   String
-  role      String    @default("member")
-  joinedAt  DateTime  @default(now())
-  group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id       String    @id @default(uuid())
+  userId   String
+  groupId  String
+  role     String    @default("member")
+  joinedAt DateTime  @default(now())
+  group    ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupId])
 }

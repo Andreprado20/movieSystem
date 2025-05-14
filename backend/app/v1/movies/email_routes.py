@@ -4,13 +4,14 @@ from datetime import datetime
 import logging
 
 from app.v1.movies import schemas, helper
+from app.auth.email_auth import get_user_by_email
 
 # Configurar logging
 logger = logging.getLogger(__name__)
 
-movies_routes = APIRouter(
-    prefix="/v1/movies",
-    tags=["Movies"],
+movies_email_routes = APIRouter(
+    prefix="/v1/email/movies",
+    tags=["Movies Email Auth"],
     responses={
         404: {"description": "Not found"},
         400: {"description": "Bad Request"},
@@ -18,7 +19,7 @@ movies_routes = APIRouter(
     },
 )
 
-@movies_routes.get("/find", 
+@movies_email_routes.get("/find", 
     response_model=dict,
     summary="Buscar filme por ID no TMDB",
     description="Retorna os detalhes de um filme buscando pelo ID no TMDB (The Movie Database)",
@@ -26,7 +27,10 @@ movies_routes = APIRouter(
         400: {"description": "ID do filme inválido"},
         404: {"description": "Filme não encontrado"}
     })
-async def get_movie(movie_id: int = Query(..., description="ID do filme no TMDB", example=550)):
+async def get_movie(
+    movie_id: int = Query(..., description="ID do filme no TMDB", example=550),
+    current_user: dict = Depends(get_user_by_email)
+):
     """
     Get movie details by movie ID from TMDB.
     """
@@ -36,7 +40,7 @@ async def get_movie(movie_id: int = Query(..., description="ID do filme no TMDB"
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@movies_routes.get("/{movie_id}",
+@movies_email_routes.get("/{movie_id}",
     response_model=dict,
     summary="Buscar filme por ID no banco de dados",
     description="Retorna os detalhes de um filme armazenado no nosso banco de dados",
@@ -46,7 +50,8 @@ async def get_movie(movie_id: int = Query(..., description="ID do filme no TMDB"
     })
 async def get_movie_from_db(
     movie_id: int = Path(..., description="ID do filme no banco de dados", example=1),
-    request: Request = None
+    request: Request = None,
+    current_user: dict = Depends(get_user_by_email)
 ):
     """
     Get movie details from our database by ID.
@@ -61,7 +66,7 @@ async def get_movie_from_db(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"404: {str(e)}")
 
-@movies_routes.post("/",
+@movies_email_routes.post("/",
     response_model=dict,
     status_code=status.HTTP_201_CREATED,
     summary="Criar novo filme",
@@ -72,7 +77,8 @@ async def get_movie_from_db(
     })
 async def create_movie(
     movie_data: schemas.MovieCreate = Body(..., description="Dados do filme a ser criado"),
-    request: Request = None
+    request: Request = None,
+    current_user: dict = Depends(get_user_by_email)
 ):
     """
     Create a new movie in our database.
@@ -93,7 +99,7 @@ async def create_movie(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@movies_routes.put("/{movie_id}",
+@movies_email_routes.put("/{movie_id}",
     response_model=dict,
     summary="Atualizar filme",
     description="Atualiza os dados de um filme existente",
@@ -105,7 +111,8 @@ async def create_movie(
 async def update_movie(
     movie_id: int = Path(..., description="ID do filme a ser atualizado", example=1),
     movie_data: schemas.MovieUpdate = Body(..., description="Novos dados do filme"),
-    request: Request = None
+    request: Request = None,
+    current_user: dict = Depends(get_user_by_email)
 ):
     """
     Update a movie in our database.
@@ -133,7 +140,7 @@ async def update_movie(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@movies_routes.delete("/{movie_id}",
+@movies_email_routes.delete("/{movie_id}",
     response_model=dict,
     summary="Deletar filme",
     description="Remove um filme do banco de dados",
@@ -144,7 +151,8 @@ async def update_movie(
     })
 async def delete_movie(
     movie_id: int = Path(..., description="ID do filme a ser deletado", example=1),
-    request: Request = None
+    request: Request = None,
+    current_user: dict = Depends(get_user_by_email)
 ):
     """
     Delete a movie from our database.
@@ -157,7 +165,7 @@ async def delete_movie(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@movies_routes.get("/",
+@movies_email_routes.get("/",
     response_model=dict,
     summary="Listar filmes",
     description="Retorna uma lista paginada de filmes do banco de dados",
@@ -168,7 +176,8 @@ async def delete_movie(
 async def list_movies(
     request: Request = None,
     page: int = Query(1, ge=1, description="Número da página", example=1),
-    limit: int = Query(10, ge=1, le=100, description="Quantidade de itens por página", example=10)
+    limit: int = Query(10, ge=1, le=100, description="Quantidade de itens por página", example=10),
+    current_user: dict = Depends(get_user_by_email)
 ):
     """
     List movies from our database with pagination.
@@ -177,5 +186,4 @@ async def list_movies(
         result = await helper.list_movies_from_db(request, page, limit)
         return result
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-        
+        raise HTTPException(status_code=400, detail=str(e)) 

@@ -50,7 +50,12 @@ def test_get_movies_in_list():
     response = client.get(f"/v1/movielist/{list_type}", headers=DEV_HEADERS)
     assert response.status_code in [200, 400, 401, 404]
     if response.status_code == 200:
-        assert isinstance(response.json(), list)
+        data = response.json()
+        # Handle both direct list response and {data: []} format
+        if isinstance(data, dict) and "data" in data:
+            assert isinstance(data["data"], list)
+        else:
+            assert isinstance(data, list)
 
 def test_remove_movie_from_list():
     """Test removing a movie from a list"""
