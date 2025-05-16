@@ -14,12 +14,6 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-print(f"SUPABASE_URL: {SUPABASE_URL}")
-print(f"SUPABASE_KEY: {SUPABASE_KEY}")
-print(f"GEMINI_API_KEY: {GEMINI_API_KEY}")
-
-
-
 # Inicialização
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
@@ -28,14 +22,13 @@ modelo = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # In production, replace with your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"],  # In production, replace with your frontend URL
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 class Pergunta(BaseModel):
     pergunta: str
 
@@ -76,4 +69,3 @@ async def responder(pergunta: Pergunta):
     filmes = supabase.table("Filme").select("*").order("avaliacaoMedia", desc=True).limit(200).execute().data
     resposta = recomendar_com_gemini(pergunta.pergunta, filmes)
     return {"resposta": resposta}
-
