@@ -62,6 +62,10 @@ Utilize linguagem clara, objetiva e respeitosa.
     resposta = modelo.generate_content(prompt)
     return resposta.text
 
+@app.get("/")
+async def root():
+    return {"message": "IA-comentarios Service is running"}
+
 # === Rota principal da API ===
 @app.post("/resumo")
 def gerar_resumo_filme(payload: FilmeID):
