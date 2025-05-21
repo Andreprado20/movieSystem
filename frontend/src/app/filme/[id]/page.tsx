@@ -3,48 +3,75 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useParams, useRouter } from "next/navigation"
-import { Clock, Star, Heart, Share2, Calendar, Settings, MessageSquare } from "lucide-react"
+import { Star, Share2, Calendar, Settings, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Header from "@/components/header"
 import { TextFormatter } from "@/components/text-formatter"
-import { getMovieById } from "@/libs/mock-data"
+import MovieForum from "@/components/forum/movie-forum"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MovieListActions } from "@/components/movie-list-actions"
+import { recommendationService } from "@/lib/recommendation-service"
+import { MovieReviews } from "@/components/movie-reviews"
+import { getImageUrl } from "@/lib/tmdb"
 
 // Define types based on the Prisma schema
 interface Filme {
-  id: string
-  title: string
-  year: number
-  rating: number
-  posterUrl: string
-  genres: string[]
-  synopsis?: string
-  director?: string
-  cast?: string[]
-  reviews?: Avaliacao[]
+  id: number
+  titulo: string
+  sinopse?: string
+  diretor?: string
+  elenco: string[]
+  genero: string[]
+  avaliacaoMedia: number
+  avaliacoes?: Avaliacao[]
+  poster_path?: string
 }
 
 interface Avaliacao {
-  id: string
-  rating: number
-  content?: string
-  likes?: number
-  user: {
-    id: string
-    name: string
-    username: string
+  id: number
+  nota: number
+  comentario?: string
+  curtidas: number
+  perfil: {
+    id: number
+    nome: string
+    tipo: string
   }
+}
+
+interface SimilarMovie {
+  id: number
+  title: string
+  posterPath: string
+  overview: string
+  releaseDate: string
+  voteAverage: number
+  similarityScore: number
+}
+
+// Interface for the Movie type that might be returned from the API
+interface Movie {
+  id: number
+  title: string
+  posterPath?: string
+  overview?: string
+  releaseDate?: string
+  voteAverage?: number
+  similarityScore?: number
 }
 
 export default function MoviePage() {
   const params = useParams()
   const router = useRouter()
   const { id } = params
-  const [isFavorite, setIsFavorite] = useState(false)
-  const [isWatchLater, setIsWatchLater] = useState(false)
+  const movieId = Number.parseInt(id as string, 10)
+
   const [movie, setMovie] = useState<Filme | null>(null)
+  const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>([])
   const [loading, setLoading] = useState(true)
+  const [similarLoading, setSimilarLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("info")
 
   // New states for AI summary
   const [reviewSummary, setReviewSummary] = useState<string | null>(null)
@@ -55,37 +82,15 @@ export default function MoviePage() {
     const fetchMovie = async () => {
       try {
         setLoading(true)
-        // Get movie data from mock data instead of API
-        const data = getMovieById(id as string)
+        // Fetch movie data from the API
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/movies/${id}`)
 
-        if (!data) {
-          throw new Error("Movie not found")
+        if (!response.ok) {
+          throw new Error(`Failed to fetch movie: ${response.statusText}`)
         }
 
-        // Transform the data to match our component's expected format
-        const transformedData: Filme = {
-          id: data.id,
-          titulo: data.title,
-          sinopse: data.synopsis || "Sinopse não disponível",
-          diretor: data.director,
-          elenco: data.cast || [],
-          genero: data.genres,
-          avaliacaoMedia: data.rating,
-          avaliacoes:
-            data.reviews?.map((review) => ({
-              id: review.id,
-              nota: review.rating,
-              comentario: review.content,
-              curtidas: review.likes || 0,
-              perfil: {
-                id: review.user.id,
-                nome: review.user.name,
-                tipo: review.user.username,
-              },
-            })) || [],
-        }
-
-        setMovie(transformedData)
+        const data = await response.json()
+        setMovie(data)
       } catch (err) {
         console.error("Error fetching movie:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch movie data")
@@ -99,6 +104,37 @@ export default function MoviePage() {
     }
   }, [id])
 
+  // Fetch similar movies
+  useEffect(() => {
+    const fetchSimilarMovies = async () => {
+      if (!movieId) return
+
+      try {
+        setSimilarLoading(true)
+        const data = await recommendationService.getSimilarMovies(movieId)
+
+        // Transform the data to ensure it matches the SimilarMovie interface
+        const transformedData: SimilarMovie[] = data.map((movie: Movie) => ({
+          id: movie.id,
+          title: movie.title,
+          posterPath: movie.posterPath || "",
+          overview: movie.overview || "",
+          releaseDate: movie.releaseDate || "",
+          voteAverage: movie.voteAverage || 0,
+          similarityScore: movie.similarityScore || 0, // Provide a default value if undefined
+        }))
+
+        setSimilarMovies(transformedData)
+      } catch (err) {
+        console.error("Error fetching similar movies:", err)
+      } finally {
+        setSimilarLoading(false)
+      }
+    }
+
+    fetchSimilarMovies()
+  }, [movieId])
+
   // New effect to fetch AI summary when movie data is loaded
   useEffect(() => {
     const fetchReviewSummary = async () => {
@@ -108,16 +144,35 @@ export default function MoviePage() {
         setSummaryLoading(true)
         setSummaryError(null)
 
-        // Simulate API call with a timeout
-        setTimeout(() => {
-          // Generate a mock summary based on the movie title
-          const mockSummary = `Os usuários geralmente elogiam "${movie.titulo}" pela sua narrativa envolvente e atuações convincentes. A maioria dos comentários destaca a qualidade técnica e a direção do filme.`
-          setReviewSummary(mockSummary)
-          setSummaryLoading(false)
-        }, 1500)
+        // Get the AI service URL from environment variables
+        const aiServiceUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
+        console.log(`Fetching review summary for movie ID: ${movie.id}`)
+
+        const response = await fetch(`${aiServiceUrl}/resumo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ filme_id: movie.id }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`)
+        }
+
+        const data = await response.json()
+        console.log("Review summary response:", data)
+
+        if (data.resumo) {
+          setReviewSummary(data.resumo)
+        } else {
+          setSummaryError("Não foi possível gerar um resumo das avaliações")
+        }
       } catch (err) {
         console.error("Error fetching review summary:", err)
         setSummaryError("Erro ao carregar o resumo das avaliações")
+      } finally {
         setSummaryLoading(false)
       }
     }
@@ -126,16 +181,6 @@ export default function MoviePage() {
       fetchReviewSummary()
     }
   }, [movie])
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite)
-    // In a real app, you would make an API call to update the user's favorites
-  }
-
-  const toggleWatchLater = () => {
-    setIsWatchLater(!isWatchLater)
-    // In a real app, you would make an API call to update the user's watch later list
-  }
 
   if (loading) {
     return (
@@ -161,8 +206,10 @@ export default function MoviePage() {
     )
   }
 
-  // Generate a placeholder image URL if no poster is available
-  const posterUrl = movie.posterUrl || `/placeholder.svg?height=400&width=270&text=${encodeURIComponent(movie.titulo)}`
+  // Use the TMDB image URL format
+  const posterUrl = movie.poster_path
+    ? getImageUrl(movie.poster_path)
+    : `/placeholder.svg?height=400&width=270&text=${encodeURIComponent(movie.titulo)}`
 
   return (
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
@@ -203,30 +250,8 @@ export default function MoviePage() {
                 ))}
               </div>
 
-              <div className="flex flex-wrap gap-4 mb-6">
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 rounded-full border-gray-700"
-                  onClick={toggleWatchLater}
-                >
-                  <Clock className={`h-4 w-4 ${isWatchLater ? "text-blue-500" : ""}`} />
-                  Assistir depois
-                </Button>
-
-                <Button variant="outline" className="flex items-center gap-2 rounded-full border-gray-700">
-                  <Star className="h-4 w-4" />
-                  Avaliar
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 rounded-full border-gray-700"
-                  onClick={toggleFavorite}
-                >
-                  <Heart className={`h-4 w-4 ${isFavorite ? "text-red-500 fill-red-500" : ""}`} />
-                  Favoritos
-                </Button>
-              </div>
+              {/* Movie List Actions */}
+              <MovieListActions movieId={movieId} />
 
               <p className="text-gray-300 mb-6">{movie.sinopse || "Sinopse não disponível"}</p>
 
@@ -262,96 +287,127 @@ export default function MoviePage() {
           </div>
         </div>
 
-        {/* AI Review Summary Section */}
-        {(reviewSummary || summaryLoading || summaryError) && (
-          <div className="mt-8 px-4 md:px-8 lg:px-16">
-            <div className="bg-gray-800/50 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <MessageSquare className="h-5 w-5 text-blue-400" />
-                <h2 className="text-xl font-bold">O que os usuários estão dizendo</h2>
-              </div>
+        {/* Tabs for different sections */}
+        <div className="mt-12 px-4 md:px-8 lg:px-16">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="bg-gray-900 p-1 rounded-lg mb-8 w-full max-w-xl">
+              <TabsTrigger value="info" className="flex items-center gap-2 data-[state=active]:bg-gray-800">
+                Informações
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="flex items-center gap-2 data-[state=active]:bg-gray-800">
+                Avaliações
+              </TabsTrigger>
+              <TabsTrigger value="forum" className="flex items-center gap-2 data-[state=active]:bg-gray-800">
+                Fórum
+              </TabsTrigger>
+              <TabsTrigger value="similar" className="flex items-center gap-2 data-[state=active]:bg-gray-800">
+                Similares
+              </TabsTrigger>
+            </TabsList>
 
-              {summaryLoading && (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-                </div>
-              )}
-
-              {summaryError && <div className="text-red-400 py-4">{summaryError}</div>}
-
-              {reviewSummary && !summaryLoading && (
-                <div className="bg-gray-700/50 rounded-lg p-4">
-                  <TextFormatter content={reviewSummary} />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Comments Section */}
-        <div className="mt-8 px-4 md:px-8 lg:px-16">
-          <h2 className="text-2xl font-bold mb-6">Comentários</h2>
-          {movie.avaliacoes && movie.avaliacoes.length > 0 ? (
-            <div className="space-y-4">
-              {movie.avaliacoes.map((avaliacao) => (
-                <div key={avaliacao.id} className="bg-gray-800/50 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 flex-shrink-0">
-                      <AvatarFallback className="bg-gray-600">{avaliacao.perfil.nome.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="text-lg mb-2">{avaliacao.comentario || "Sem comentário"}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <span>{avaliacao.curtidas}</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-white">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M7 10v12" />
-                              <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
-                            </svg>
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>0</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-white">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M17 14V2" />
-                              <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
-                            </svg>
-                          </Button>
-                        </div>
-                      </div>
+            <TabsContent value="info">
+              {/* AI Review Summary Section */}
+              {(reviewSummary || summaryLoading || summaryError) && (
+                <div className="mb-8">
+                  <div className="bg-gray-800/50 rounded-lg p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageSquare className="h-5 w-5 text-blue-400" />
+                      <h2 className="text-xl font-bold">O que os usuários estão dizendo</h2>
                     </div>
+
+                    {summaryLoading && (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                      </div>
+                    )}
+
+                    {summaryError && <div className="text-red-400 py-4">{summaryError}</div>}
+
+                    {reviewSummary && !summaryLoading && (
+                      <div className="bg-gray-700/50 rounded-lg p-4">
+                        <TextFormatter content={reviewSummary} />
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-gray-800/50 rounded-lg p-6 text-center">
-              <p className="text-gray-400">Nenhum comentário disponível para este filme.</p>
-              <Button className="mt-4 bg-blue-600 hover:bg-blue-700">Seja o primeiro a comentar</Button>
-            </div>
-          )}
+              )}
+
+              {/* Additional movie information could go here */}
+              <div className="bg-gray-800/50 rounded-lg p-6 mb-8">
+                <h2 className="text-xl font-bold mb-4">Detalhes Técnicos</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium text-gray-300">Diretor</h3>
+                    <p>{movie.diretor || "Não disponível"}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-300">Gêneros</h3>
+                    <p>{movie.genero.join(", ") || "Não disponível"}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-300">Elenco Principal</h3>
+                    <p>{movie.elenco.join(", ") || "Não disponível"}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-300">Avaliação</h3>
+                    <p>{movie.avaliacaoMedia.toFixed(1)} / 5.0</p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <MovieReviews movieId={movieId} movieTitle={movie.titulo} />
+            </TabsContent>
+
+            <TabsContent value="forum">
+              {/* Forum Component */}
+              <MovieForum movieId={movieId} movieTitle={movie.titulo} />
+            </TabsContent>
+
+            <TabsContent value="similar">
+              {/* Similar Movies */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-6">Filmes Similares</h2>
+
+                {similarLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : similarMovies.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {similarMovies.map((movie) => (
+                      <div
+                        key={movie.id}
+                        className="cursor-pointer group"
+                        onClick={() => router.push(`/filme/${movie.id}`)}
+                      >
+                        <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                          <Image
+                            src={getImageUrl(movie.posterPath) || "/placeholder.svg"}
+                            alt={movie.title}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                          />
+                        </div>
+                        <h3 className="mt-2 text-sm font-medium truncate">{movie.title}</h3>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <Star className="h-3 w-3 text-yellow-500 mr-1" fill="currentColor" />
+                          {movie.voteAverage.toFixed(1)}
+                          <span className="mx-1">•</span>
+                          <span>Similaridade: {Math.round(movie.similarityScore * 100)}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-800/50 rounded-lg p-6 text-center">
+                    <p className="text-gray-400">Nenhum filme similar encontrado.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

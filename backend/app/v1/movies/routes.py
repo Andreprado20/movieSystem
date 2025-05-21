@@ -56,8 +56,10 @@ async def get_movie_from_db(
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
         return movie
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"404: {str(e)}")
 
 @movies_routes.post("/",
     response_model=dict,
@@ -69,14 +71,24 @@ async def get_movie_from_db(
         400: {"description": "Dados inválidos"}
     })
 async def create_movie(
-    movie_data: schemas.MovieBase = Body(..., description="Dados do filme a ser criado"),
+    movie_data: schemas.MovieCreate = Body(..., description="Dados do filme a ser criado"),
     request: Request = None
 ):
     """
     Create a new movie in our database.
     """
     try:
-        movie = await helper.create_movie_in_db(movie_data.dict(), request)
+        # Convert the schema field names to match what the database expects
+        data_dict = {
+            "title": movie_data.titulo,
+            "description": movie_data.sinopse,
+            "release_date": movie_data.data_lancamento.isoformat() if movie_data.data_lancamento else None,
+            "genre": movie_data.genero,
+            "rating": movie_data.avaliacao,
+            "director": movie_data.diretor,
+            "cast": movie_data.elenco
+        }
+        movie = await helper.create_movie_in_db(data_dict, request)
         return movie
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -92,14 +104,31 @@ async def create_movie(
     })
 async def update_movie(
     movie_id: int = Path(..., description="ID do filme a ser atualizado", example=1),
-    movie_data: schemas.MovieBase = Body(..., description="Novos dados do filme"),
+    movie_data: schemas.MovieUpdate = Body(..., description="Novos dados do filme"),
     request: Request = None
 ):
     """
     Update a movie in our database.
     """
     try:
-        movie = await helper.update_movie_in_db(movie_id, movie_data.dict(), request)
+        # Convert the schema field names to match what the database expects
+        data_dict = {}
+        if hasattr(movie_data, 'titulo') and movie_data.titulo is not None:
+            data_dict["title"] = movie_data.titulo
+        if hasattr(movie_data, 'sinopse') and movie_data.sinopse is not None:
+            data_dict["description"] = movie_data.sinopse
+        if hasattr(movie_data, 'data_lancamento') and movie_data.data_lancamento is not None:
+            data_dict["release_date"] = movie_data.data_lancamento.isoformat()
+        if hasattr(movie_data, 'genero') and movie_data.genero is not None:
+            data_dict["genre"] = movie_data.genero
+        if hasattr(movie_data, 'avaliacao') and movie_data.avaliacao is not None:
+            data_dict["rating"] = movie_data.avaliacao
+        if hasattr(movie_data, 'diretor') and movie_data.diretor is not None:
+            data_dict["director"] = movie_data.diretor
+        if hasattr(movie_data, 'elenco') and movie_data.elenco is not None:
+            data_dict["cast"] = movie_data.elenco
+            
+        movie = await helper.update_movie_in_db(movie_id, data_dict, request)
         return movie
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
