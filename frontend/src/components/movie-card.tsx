@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Star } from "lucide-react"
+import { getImageUrl } from "@/lib/tmdb"
 
 interface MovieCardProps {
   id: string
@@ -22,6 +23,9 @@ export default function MovieCard({ id, title, year, rating, posterUrl, genres }
     router.push(`/filme/${id}`)
   }
 
+  // Use the TMDB image URL format
+  const imageUrl = getImageUrl(posterUrl)
+
   return (
     <div
       className="cursor-pointer group relative"
@@ -31,7 +35,7 @@ export default function MovieCard({ id, title, year, rating, posterUrl, genres }
     >
       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
         <Image
-          src={posterUrl || "/placeholder.svg"}
+          src={imageUrl || "/placeholder.svg"}
           alt={title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

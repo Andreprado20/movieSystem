@@ -16,7 +16,11 @@ dependencies = [
     "firebase-admin (>=6.7.0,<7.0.0)",
     "supabase (>=2.15.0,<3.0.0)",
     "email-validator (>=2.2.0,<3.0.0)",
-    "dotenv (>=0.9.9,<0.10.0)"
+    "dotenv (>=0.9.9,<0.10.0)",
+    "websockets (>=14.0.0,<15.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "bcrypt (>=4.3.0,<5.0.0)",
+    "python-jose[cryptography] (>=3.4.0,<4.0.0)"
 ]
 
 
@@ -31,3 +35,12 @@ host = "0.0.0.0"
 port = "8000"
 reload = "false"
 log_level = "info"
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "^0.34.2"
+watchfiles = "^1.0.5"
+
+[tool.poetry.scripts]
+dev = "run_dev:main"
+start = "run:main"
+

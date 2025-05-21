@@ -1,37 +1,16 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Sidebar from "@/components/sidebar"
-import ChatArea from "@/components/chat-area"
 import Header from "@/components/header"
+import ChatGroups from "@/components/chat/chat-groups"
+import ProtectedRoute from "@/components/protected-route"
 
 export default function ChatPage() {
-  const searchParams = useSearchParams()
-  const [activeConversation, setActiveConversation] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Get the conversation ID from the URL query parameters
-    const conversationId = searchParams.get("conversation")
-    if (conversationId) {
-      setActiveConversation(conversationId)
-    }
-  }, [searchParams])
-
   return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <div className="flex flex-1 overflow-hidden w-full">
-        <div className="hidden md:block">
-          <Sidebar />
-        </div>
-        <div className="md:hidden w-full">
-          <Sidebar />
-        </div>
-        <div className="flex-1 w-full">
-          <ChatArea conversationId={activeConversation} />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#121212] text-white flex flex-col">
+        <Header />
+        <div className="flex-1 overflow-hidden">
+          <ChatGroups />
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

@@ -1,36 +1,39 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 interface TextFormatterProps {
   content: string
 }
 
 export function TextFormatter({ content }: TextFormatterProps) {
-  // Function to convert the text to HTML with basic formatting
-  const formatText = (text: string) => {
-    // Replace line breaks with <br> tags
-    let formattedText = text.replace(/\n/g, "<br />")
+  const [formattedContent, setFormattedContent] = useState("")
 
-    // Bold text (** or __)
-    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    formattedText = formattedText.replace(/__(.*?)__/g, "<strong>$1</strong>")
-
-    // Italic text (* or _)
-    formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>")
-    formattedText = formattedText.replace(/_(.*?)_/g, "<em>$1</em>")
-
-    // Bullet points
-    formattedText = formattedText.replace(/• (.*?)(<br \/>|$)/g, "<li>$1</li>")
-    formattedText = formattedText.replace(/- (.*?)(<br \/>|$)/g, "<li>$1</li>")
+  useEffect(() => {
+    // Basic formatting: Convert markdown-like syntax to HTML
+    let formatted = content
+      // Bold text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      // Italic text
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      // Headers
+      .replace(/^# (.*$)/gm, "<h1>$1</h1>")
+      .replace(/^## (.*$)/gm, "<h2>$1</h2>")
+      .replace(/^### (.*$)/gm, "<h3>$1</h3>")
+      // Lists
+      .replace(/^\s*- (.*$)/gm, "<li>$1</li>")
+      // Links
+      .replace(/\[([^\]]+)\]$$([^)]+)$$/g, '<a href="$2" class="text-blue-400 hover:underline">$1</a>')
+      // Line breaks
+      .replace(/\n/g, "<br />")
 
     // Wrap lists in <ul> tags
-    if (formattedText.includes("<li>")) {
-      formattedText = formattedText.replace(/<li>(.*?)<\/li>/g, "<ul><li>$1</li></ul>")
-      // Combine adjacent lists
-      formattedText = formattedText.replace(/<\/ul><ul>/g, "")
+    if (formatted.includes("<li>")) {
+      formatted = formatted.replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
     }
 
-    return formattedText
-  }
+    setFormattedContent(formatted)
+  }, [content])
 
-  return <div className="text-formatter" dangerouslySetInnerHTML={{ __html: formatText(content) }} />
+  return <div dangerouslySetInnerHTML={{ __html: formattedContent }} className="prose prose-invert max-w-none" />
 }

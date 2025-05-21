@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 app = create_app()
 
-if __name__ == "__main__":
+def main():
     # Update logging format
     LOGGING_CONFIG["formatters"]["access"][
         "fmt"
@@ -18,7 +18,6 @@ if __name__ == "__main__":
     
     # Get settings and run with explicit parameters
     settings = get_settings().fastapi
-    logger.info(f"Starting server on {settings.host}:{settings.port}")
     
     uvicorn.run(
         app="run:app",
@@ -27,3 +26,6 @@ if __name__ == "__main__":
         reload=False,  # Disable reload in production
         log_level="info"
     )
+
+if __name__ == "__main__":
+    main()

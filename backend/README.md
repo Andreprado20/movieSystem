@@ -88,6 +88,55 @@ To populate the database with popular movies from TMDB:
 curl -X POST http://localhost:8000/v1/movies/import-popular
 ```
 
+## Testing
+
+The application includes a comprehensive test suite with benchmarking capabilities to help identify performance bottlenecks.
+
+### Setting up the Test Environment
+
+1. Install test dependencies:
+   ```bash
+   pip install -r test/requirements-test.txt
+   ```
+
+2. Set up test directories:
+   ```bash
+   python test/setup.py
+   ```
+
+### Running Tests
+
+Run the test suite using the included script:
+
+```bash
+# Run all tests
+python test/run_tests.py
+
+# Run with detailed output
+python test/run_tests.py --verbose
+
+# Run specific test module
+python test/run_tests.py --module test_users
+
+# Generate test report
+python test/run_tests.py --html
+
+# Generate coverage report
+python test/run_tests.py --coverage
+```
+
+Test results and benchmark data are stored in the `test/results` directory.
+
+### Test Suite Features
+
+- Integration tests for all API endpoints
+- Performance benchmarking to track response times
+- Mocking for external dependencies (Firebase, Supabase, TMDB)
+- HTML reports for detailed test results
+- Code coverage analysis
+
+For more details, see the [test README](test/README.md).
+
 ## License
 
 This project is licensed under the MIT License.
