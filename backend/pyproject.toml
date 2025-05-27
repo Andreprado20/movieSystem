@@ -1,46 +1,22 @@
-[project]
-name = "app"
+[tool.poetry]
+name = "cinematch"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "Lucas Guarnier",email = "lucaszg090@gmail.com"}
-]
-requires-python = ">=3.12,<4.0"
-dependencies = [
-    "fastapi (>=0.115.12,<0.116.0)",
-    "uvicorn[standard] (>=0.34.0,<0.35.0)",
-    "python-dotenv (>=1.1.0,<2.0.0)",
-    "requests (>=2.32.3,<3.0.0)",
-    "pydantic (>=2.11.3,<3.0.0)",
-    "pydantic-settings (>=2.8.1,<3.0.0)",
-    "firebase-admin (>=6.7.0,<7.0.0)",
-    "supabase (>=2.15.0,<3.0.0)",
-    "email-validator (>=2.2.0,<3.0.0)",
-    "dotenv (>=0.9.9,<0.10.0)",
-    "websockets (>=14.0.0,<15.0.0)",
-    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
-    "bcrypt (>=4.3.0,<5.0.0)",
-    "python-jose[cryptography] (>=3.4.0,<4.0.0)"
-]
+description = "Backend do Cinematch"
+authors = ["Lucas Guarnier"]
+readme = "README.md"
+packages = [{include = "apps"}, {include = "cinematch"}]
 
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.2.1"
+djangorestframework = "^3.16.0"
+aiohttp = "^3.12.2"
+google-generativeai = "^0.8.5"
+django-cors-headers = "^4.7.0"
+pillow = "^11.2.1"
+django-extensions = "^4.1"
+djangorestframework-simplejwt = "^5.5.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.app]
-database_url = "postgresql://postgres:Fde2ZOInnYEScXdn@db.qoplwtzicemqpxytfzoj.supabase.co:5432/postgres"
-firebase_credentials_path = "/app/app/moviesystem-c4130-firebase-adminsdk-fbsvc-62e886a59f.json"
-host = "0.0.0.0"
-port = "8000"
-reload = "false"
-log_level = "info"
-
-[tool.poetry.group.dev.dependencies]
-uvicorn = "^0.34.2"
-watchfiles = "^1.0.5"
-
-[tool.poetry.scripts]
-dev = "run_dev:main"
-start = "run:main"
-

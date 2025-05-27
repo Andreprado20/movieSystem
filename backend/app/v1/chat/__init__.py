@@ -1,1 +1,0 @@
-# Chat package for group messaging functionality 
